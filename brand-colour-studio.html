@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Colour Studio | Brand palette SaaS for client approvals</title>
+<meta name="description" content="The world's first brand colour pipeline tool. Pick your palette, generate your brand kit, and send clients a one-click approval link.">
+<link rel="canonical" href="https://brandcolours.meetingpipeline.com/">
+<meta property="og:title" content="Brand Colour Studio">
+<meta property="og:description" content="Create accessible brand colour systems, client-ready PDFs and approval links in minutes.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://brandcolours.meetingpipeline.com/">
+<meta name="theme-color" content="#0f0f0f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --ink: #0f0f0f;
+  --ink2: #2d2d2d;
+  --ink3: #5a5a5a;
+  --ink4: #9a9a9a;
+  --paper: #fafaf8;
+  --paper2: #f2f1ee;
+  --paper3: #e8e6e1;
+  --border: #e0ddd8;
+  --accent: #c9a826;
+  --accent2: #8b1a1a;
+  --success: #1a6b3a;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* ─── UTILITY ─── */
+.hidden{display:none!important}
+.flex{display:flex;align-items:center}
+.gap4{gap:4px}.gap8{gap:8px}.gap12{gap:12px}.gap16{gap:16px}
+.wrap{flex-wrap:wrap}
+.col{flex-direction:column;align-items:flex-start}
+.grow{flex:1}
+.text-sm{font-size:12px}.text-xs{font-size:11px}.text-lg{font-size:16px}
+.bold{font-weight:600}.muted{color:var(--ink3)}
+.mono{font-family:var(--font-mono)}
+.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt24{margin-top:24px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid currentColor;letter-spacing:.02em}
+.pill-green{color:#1a6b3a;background:#e8f5ee;border-color:#a3d4b5}
+.pill-blue{color:#0c3f7c;background:#e4eefb;border-color:#9dc0ef}
+.pill-amber{color:#6b3b00;background:#fef3e2;border-color:#f0c070}
+.pill-red{color:#8b1a1a;background:#fde8e8;border-color:#e8a0a0}
+.pill-purple{color:#4a1e8b;background:#f0e8fb;border-color:#c0a0e8}
+input,select,textarea{font-family:var(--font-body);font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 11px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+button{font-family:var(--font-body);cursor:pointer;border:none;background:none;color:inherit}
+
+/* ─── HEADER ─── */
+#header{position:sticky;top:0;z-index:100;background:var(--ink);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;border-bottom:1px solid #222}
+.logo-text{font-family:var(--font-display);font-size:17px;color:#fff;font-weight:700;letter-spacing:-.01em}
+.logo-sub{font-size:10px;color:#888;font-family:var(--font-body);margin-left:6px;letter-spacing:.05em;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;letter-spacing:.02em}
+.btn-outline{border:1px solid #555;color:#ddd;background:none}
+.btn-outline:hover{border-color:#fff;color:#fff}
+.btn-cta{background:var(--accent);color:var(--ink);border:none}
+.btn-cta:hover{background:#d4b030}
+#user-chip{font-size:11px;color:#aaa;cursor:pointer;border:1px solid #444;padding:4px 10px;border-radius:20px}
+#user-chip:hover{border-color:#888;color:#fff}
+
+/* ─── HERO ─── */
+#hero{background:linear-gradient(135deg,#0f0f0f 0%,#1a1612 60%,#0d1a12 100%);padding:56px 20px 40px;text-align:center;position:relative;overflow:hidden}
+#hero::before{content:'';position:absolute;top:-40%;left:-10%;width:60%;height:180%;background:radial-gradient(ellipse,rgba(201,168,38,.07) 0%,transparent 70%);pointer-events:none}
+#hero::after{content:'';position:absolute;top:-40%;right:-10%;width:50%;height:180%;background:radial-gradient(ellipse,rgba(139,26,26,.06) 0%,transparent 70%);pointer-events:none}
+.hero-label{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.hero-title{font-family:var(--font-display);font-size:clamp(28px,5vw,52px);color:#fff;line-height:1.15;font-weight:900;margin-bottom:14px}
+.hero-title span{color:var(--accent)}
+.hero-sub{font-size:clamp(13px,2vw,16px);color:#aaa;max-width:560px;margin:0 auto 28px;line-height:1.65}
+.hero-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-hero-primary{background:var(--accent);color:var(--ink);font-size:14px;font-weight:700;padding:12px 28px;border-radius:8px;letter-spacing:.02em;border:none}
+.btn-hero-primary:hover{background:#d4b030;transform:translateY(-1px)}
+.btn-hero-secondary{background:transparent;color:#ddd;font-size:13px;font-weight:500;padding:12px 24px;border-radius:8px;border:1px solid #444}
+.btn-hero-secondary:hover{border-color:#888;color:#fff}
+.hero-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.hero-pill{font-size:11px;color:#888;border:1px solid #333;padding:4px 10px;border-radius:20px}
+
+/* ─── MAIN LAYOUT ─── */
+#app{max-width:1160px;margin:0 auto;padding:0 16px}
+
+/* ─── SECTION TITLES ─── */
+.section-header{padding:28px 0 18px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.section-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink)}
+.section-desc{font-size:13px;color:var(--ink3);margin-top:4px}
+
+/* ─── TABS ─── */
+.main-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:0}
+.main-tab{font-size:12.5px;font-weight:600;padding:10px 16px;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;letter-spacing:.01em;cursor:pointer;transition:color .15s}
+.main-tab:hover{color:var(--ink)}
+.main-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ─── USER TYPE SELECTOR ─── */
+#user-type-overlay{position:fixed;inset:0;background:rgba(10,10,10,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.utype-box{background:var(--paper);border-radius:16px;max-width:600px;width:100%;padding:36px 32px;box-shadow:var(--shadow-lg)}
+.utype-title{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.utype-sub{font-size:13px;color:var(--ink3);margin-bottom:24px}
+.utype-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.utype-card{border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;text-align:center}
+.utype-card:hover{border-color:var(--ink);transform:translateY(-1px);box-shadow:var(--shadow)}
+.utype-card.selected{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.utype-icon{font-size:22px;margin-bottom:6px}
+.utype-label{font-size:12px;font-weight:600;display:block}
+.utype-desc{font-size:10px;color:var(--ink3);margin-top:3px}
+.utype-card.selected .utype-desc{color:#aaa}
+.btn-utype-start{width:100%;padding:13px;background:var(--ink);color:var(--paper);border-radius:8px;font-size:14px;font-weight:700;letter-spacing:.02em}
+.btn-utype-start:hover{background:var(--ink2)}
+.skip-link{font-size:11px;color:var(--ink4);text-align:center;display:block;margin-top:12px;cursor:pointer}
+.skip-link:hover{color:var(--ink3)}
+
+/* ─── FILTER BAR ─── */
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-search{flex:1;min-width:160px;max-width:280px}
+.filter-chip{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--border);color:var(--ink3);background:var(--paper);cursor:pointer;transition:all .12s;letter-spacing:.01em}
+.filter-chip:hover{border-color:var(--ink);color:var(--ink)}
+.filter-chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* ─── PALETTE GRID ─── */
+.pal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.pal-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .18s;position:relative}
+.pal-card:hover{border-color:var(--ink2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.pal-card.selected{border:2px solid var(--ink);box-shadow:var(--shadow-lg)}
+.pal-swatches{display:flex;height:48px}
+.pal-swatch{flex:1;transition:flex .2s}
+.pal-card:hover .pal-swatch{flex:1}
+.pal-body{padding:11px 13px 10px}
+.pal-code{font-size:10px;font-family:var(--font-mono);color:var(--ink4);letter-spacing:.04em;margin-bottom:2px}
+.pal-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.pal-desc{font-size:11px;color:var(--ink3);margin-bottom:6px}
+.pal-tags{display:flex;gap:4px;flex-wrap:wrap}
+.pal-tag{font-size:10px;padding:1px 6px;border-radius:10px;border:1px solid var(--border);color:var(--ink3)}
+.pal-psychology{font-size:10.5px;color:var(--ink3);font-style:italic;margin-top:5px;border-top:1px solid var(--border);padding-top:5px;line-height:1.45}
+.week-badge{position:absolute;top:8px;right:8px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--accent);color:var(--ink);letter-spacing:.04em;text-transform:uppercase}
+
+/* ─── PALETTE DETAIL PANEL ─── */
+#detail-panel{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;display:none}
+#detail-panel.visible{display:block}
+.detail-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.detail-swatches-row{display:flex;height:56px;border-radius:8px;overflow:hidden;flex:1;min-width:200px;border:1px solid var(--border)}
+.detail-swatch{flex:1;display:flex;align-items:flex-end;padding:4px;cursor:pointer;transition:flex .2s;position:relative}
+.detail-swatch:hover{flex:2}
+.detail-swatch-hex{font-size:8.5px;font-family:var(--font-mono);opacity:0;transition:opacity .15s;padding:2px 4px;border-radius:3px;background:rgba(0,0,0,.4);color:#fff;white-space:nowrap}
+.detail-swatch:hover .detail-swatch-hex{opacity:1}
+.detail-info{flex:1;min-width:180px}
+.detail-code{font-size:11px;font-family:var(--font-mono);color:var(--ink4)}
+.detail-name{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--ink)}
+.detail-desc{font-size:12px;color:var(--ink3);margin-top:3px}
+.detail-wcag{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.wcag-pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+.wcag-pass{background:#e8f5ee;color:#1a6b3a}
+.wcag-fail{background:#fde8e8;color:#8b1a1a}
+.color-details-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:16px}
+.color-detail-row{display:flex;align-items:center;gap:8px;background:var(--paper2);border-radius:var(--radius-sm);padding:8px 10px}
+.cdot{width:30px;height:30px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.08)}
+.cinfo{flex:1}
+.crole{font-size:11px;font-weight:600;color:var(--ink)}
+.chex{font-size:11px;font-family:var(--font-mono);color:var(--ink3)}
+
+/* ─── PREVIEW TOGGLES ─── */
+.preview-toggle-bar{display:flex;gap:4px;margin-bottom:12px;background:var(--paper2);border-radius:8px;padding:3px;display:inline-flex}
+.ptoggle{font-size:11.5px;font-weight:600;padding:6px 14px;border-radius:6px;color:var(--ink3);cursor:pointer;transition:all .12s}
+.ptoggle.active{background:var(--paper);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.mock-container{border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#fff;max-width:680px}
+/* Website mockup */
+.mock-nav{height:38px;display:flex;align-items:center;padding:0 16px;gap:10px}
+.mock-logo-block{height:10px;width:70px;border-radius:3px}
+.mock-nav-links{display:flex;gap:6px;margin-left:auto}
+.mock-nav-link{height:6px;width:36px;border-radius:3px;opacity:.6}
+.mock-hero-area{padding:24px 20px 16px;display:flex;gap:16px;align-items:flex-start}
+.mock-text-col{flex:1}
+.mock-h1{height:14px;border-radius:3px;margin-bottom:7px;width:75%}
+.mock-h2{height:8px;border-radius:3px;margin-bottom:5px;width:90%;opacity:.55}
+.mock-h3{height:8px;border-radius:3px;margin-bottom:14px;width:55%;opacity:.35}
+.mock-btn-block{height:28px;width:90px;border-radius:6px}
+.mock-hero-img{width:90px;height:80px;border-radius:8px;flex-shrink:0}
+.mock-cards-row{display:flex;gap:8px;padding:0 20px 16px}
+.mock-mini-card{flex:1;height:52px;border-radius:7px;border:1px solid rgba(0,0,0,.07)}
+.mock-footer{height:28px;display:flex;align-items:center;padding:0 16px}
+.mock-footer-text{height:6px;width:120px;border-radius:3px;opacity:.4}
+/* Report mockup */
+.report-mock{padding:20px 22px;background:#fff}
+.rep-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:3px solid var(--rp)}
+.rep-logo-block{width:44px;height:16px;border-radius:2px}
+.rep-title-col{flex:1}
+.rep-title{height:11px;border-radius:2px;width:60%;margin-bottom:5px}
+.rep-subtitle{height:7px;border-radius:2px;width:40%;opacity:.5}
+.rep-section-bar{height:22px;border-radius:4px;margin-bottom:10px;width:100%;display:flex;align-items:center;padding:0 10px}
+.rep-section-label{height:6px;width:80px;border-radius:2px;background:rgba(255,255,255,.7)}
+.rep-body-rows{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.rep-row{height:7px;border-radius:2px;opacity:.3}
+.rep-chart-area{display:flex;gap:6px;align-items:flex-end;height:50px;margin-bottom:10px}
+.rep-bar{border-radius:3px 3px 0 0;flex:1}
+.rep-kpis{display:flex;gap:6px;margin-bottom:4px}
+.rep-kpi{flex:1;height:34px;border-radius:5px;border:1px solid rgba(0,0,0,.06)}
+
+/* ─── DARK MODE TOGGLE ─── */
+.dark-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink3);cursor:pointer}
+.toggle-track{width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;transition:background .2s}
+.toggle-track.on{background:var(--ink)}
+.toggle-knob{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-track.on .toggle-knob{transform:translateX(16px)}
+
+/* ─── ACTION BUTTONS BAR ─── */
+.action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.action-btn{font-size:12px;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--border);color:var(--ink3);background:var(--paper);display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .12s;letter-spacing:.01em}
+.action-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--paper2)}
+.action-btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.action-btn.primary:hover{background:var(--ink2)}
+.action-btn .icon{font-size:14px}
+
+/* ─── QUESTIONNAIRE ─── */
+#questionnaire{max-width:640px}
+.q-step{display:none}.q-step.active{display:block}
+.q-progress{display:flex;gap:4px;margin-bottom:24px}
+.q-dot{height:4px;flex:1;border-radius:2px;background:var(--border);transition:background .2s}
+.q-dot.done{background:var(--ink)}
+.q-label{font-size:11px;font-weight:600;color:var(--ink4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.q-question{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--ink);margin-bottom:18px;line-height:1.3}
+.q-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:20px}
+.q-option{border:1.5px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:all .12s;text-align:center}
+.q-option:hover{border-color:var(--ink2);background:var(--paper2)}
+.q-option.selected{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.q-option-icon{font-size:18px;margin-bottom:4px}
+.q-option-text{font-size:12px;font-weight:600}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.btn-q-next{background:var(--ink);color:var(--paper);font-size:13px;font-weight:700;padding:10px 24px;border-radius:8px;letter-spacing:.02em}
+.btn-q-next:hover{background:var(--ink2)}
+.btn-q-next:disabled{opacity:.4;cursor:not-allowed}
+.btn-q-back{font-size:12px;color:var(--ink3);text-decoration:underline;cursor:pointer}
+/* Results */
+.q-results{display:none}
+.q-results.visible{display:block}
+.result-card{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;cursor:pointer;transition:all .15s}
+.result-card:hover{border-color:var(--ink);transform:translateX(3px)}
+.result-card.rank1{border-color:var(--accent);background:linear-gradient(135deg,#fffdf5,var(--paper))}
+.result-top{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.result-swatches{display:flex;height:36px;border-radius:6px;overflow:hidden;width:120px;flex-shrink:0;border:1px solid var(--border)}
+.result-sw{flex:1}
+.result-info{flex:1}
+.result-rank{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.result-name{font-size:13px;font-weight:700;color:var(--ink)}
+.result-match{font-size:11px;color:var(--ink3)}
+.result-score{font-size:13px;font-weight:700;color:var(--success);flex-shrink:0}
+.result-card.rank1 .result-rank{color:var(--accent)}
+
+/* ─── EXPORT PANEL ─── */
+#export-panel{background:var(--paper2);border-radius:var(--radius);padding:20px;margin-top:16px;display:none}
+#export-panel.visible{display:block}
+.export-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.etab{font-size:11.5px;font-weight:600;padding:7px 14px;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;letter-spacing:.01em}
+.etab:hover{color:var(--ink)}
+.etab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.epanel{display:none}.epanel.active{display:block}
+.code-block{background:var(--ink);color:#e8e8e8;border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:11.5px;line-height:1.7;position:relative;overflow-x:auto;white-space:pre}
+.code-copy-btn{position:absolute;top:8px;right:8px;font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.15);color:#ddd;border:none;cursor:pointer}
+.code-copy-btn:hover{background:rgba(255,255,255,.25)}
+.ai-prompt-option{border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+.ai-logo{font-size:18px;flex-shrink:0;margin-top:2px}
+.ai-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.ai-prompt-text{font-size:11px;font-family:var(--font-mono);color:var(--ink3);line-height:1.5;word-break:break-all}
+.ai-copy-btn{margin-top:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;border:1px solid var(--border);color:var(--ink3);cursor:pointer}
+.ai-copy-btn:hover{border-color:var(--ink);color:var(--ink)}
+.client-link-box{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.client-link-input{flex:1;font-family:var(--font-mono);font-size:11px;min-width:200px;background:var(--paper);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 11px;color:var(--ink)}
+.mailto-preview{font-size:12px;color:var(--ink3);margin-top:8px;line-height:1.6}
+.embed-instructions{font-size:12px;color:var(--ink3);line-height:1.7;margin-bottom:12px}
+
+/* ─── LOGO UPLOAD ─── */
+#logo-upload-area{border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .15s;background:var(--paper2);position:relative}
+#logo-upload-area:hover,#logo-upload-area.drag{border-color:var(--ink);background:var(--paper3)}
+#logo-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:28px;margin-bottom:8px}
+.upload-label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.upload-sub{font-size:11px;color:var(--ink3)}
+#logo-extracted{margin-top:16px;display:none}
+#logo-extracted.visible{display:block}
+#logo-preview-img{max-height:80px;max-width:180px;border-radius:6px;margin-bottom:10px;border:1px solid var(--border)}
+.extracted-swatches{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ext-swatch{width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .12s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;position:relative}
+.ext-swatch:hover{border-color:var(--ink);transform:scale(1.08)}
+.ext-swatch.sel{border-color:var(--ink)}
+.ext-hex-label{font-size:8px;font-family:var(--font-mono);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);font-weight:600}
+.ext-build-btn{background:var(--ink);color:var(--paper);font-size:13px;font-weight:700;padding:10px 22px;border-radius:8px}
+.ext-build-btn:hover{background:var(--ink2)}
+
+/* ─── CUSTOM MIXER ─── */
+.mixer-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:480px){.mixer-grid{grid-template-columns:1fr}}
+.mixer-slot{background:var(--paper2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.mx-label{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px;letter-spacing:.03em;text-transform:uppercase}
+.mx-preview{height:32px;border-radius:6px;margin-bottom:8px;border:1px solid rgba(0,0,0,.08)}
+.mx-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.mx-row label{font-size:11px;color:var(--ink3);width:64px;flex-shrink:0}
+.mx-row input[type=color]{width:30px;height:24px;padding:0;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:none}
+.mx-row input[type=text]{flex:1;font-size:11px;font-family:var(--font-mono)}
+.mx-meta{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.mx-meta input{flex:1;min-width:120px}
+
+/* ─── WEEK SECTION ─── */
+.week-section{background:linear-gradient(135deg,var(--paper2),var(--paper3));border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.week-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.week-title{font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.week-body{font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:12px}
+.week-swatches{display:flex;height:44px;border-radius:8px;overflow:hidden;border:1px solid var(--border);max-width:320px}
+.week-sw{flex:1}
+
+/* ─── PRICING SECTION ─── */
+#pricing-section{padding:40px 0}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px}
+.price-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:22px;position:relative}
+.price-card.featured{border:2px solid var(--ink);background:linear-gradient(135deg,var(--paper),var(--paper2))}
+.price-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;background:var(--accent);color:var(--ink);white-space:nowrap;letter-spacing:.04em}
+.price-name{font-size:13px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.price-amount{font-family:var(--font-display);font-size:32px;font-weight:900;color:var(--ink);line-height:1}
+.price-freq{font-size:12px;color:var(--ink3);margin-bottom:14px;display:block;margin-top:4px}
+.price-feat{font-size:12px;color:var(--ink3);padding:5px 0;border-top:1px solid var(--border);display:flex;align-items:flex-start;gap:7px;line-height:1.4}
+.price-feat .pf-icon{flex-shrink:0;font-size:12px;margin-top:1px}
+.price-btn{width:100%;padding:10px;background:var(--ink);color:var(--paper);border-radius:8px;font-size:13px;font-weight:700;margin-top:14px;letter-spacing:.02em}
+.price-card.featured .price-btn{background:var(--accent);color:var(--ink)}
+.price-btn:hover{opacity:.85}
+
+/* ─── SHARE CARD ─── */
+#share-canvas-wrapper{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:inline-block;max-width:100%}
+#share-canvas{display:block;max-width:100%;height:auto}
+
+/* ─── FOOTER ─── */
+#footer{background:var(--ink);color:#888;text-align:center;padding:24px 16px;font-size:12px;margin-top:48px}
+#footer a{color:#aaa;text-decoration:none}
+#footer a:hover{color:#fff}
+.footer-logo{font-family:var(--font-display);color:#fff;font-size:15px;margin-bottom:6px}
+
+/* ─── TOAST ─── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:1000;transform:translateY(60px);opacity:0;transition:all .25s;pointer-events:none;max-width:280px;box-shadow:var(--shadow-lg)}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:640px){
+  #header .logo-sub{display:none}
+  #header{height:auto;min-height:52px;padding:8px 12px;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  .header-right{gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  #user-chip{max-width:138px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hero-title{font-size:26px}
+  .pal-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .detail-header{flex-direction:column}
+  .color-details-grid{grid-template-columns:1fr 1fr}
+  .action-bar{gap:6px}
+  .action-btn{font-size:11px;padding:7px 10px}
+  .pricing-grid{grid-template-columns:1fr}
+  .utype-box{padding:24px 18px}
+}
+@media(max-width:400px){
+  .q-options{grid-template-columns:1fr 1fr}
+  .main-tabs{gap:0}
+  .main-tab{padding:10px 10px;font-size:11px}
+}
+
+/* ─── NEW STYLES: UPGRADE MODAL ─── */
+#upgrade-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#upgrade-modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.upgrade-modal-box {
+  background: rgba(250, 250, 248, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  max-width: 580px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: var(--shadow-lg), 0 20px 40px rgba(0,0,0,0.18);
+  transform: translateY(20px);
+  transition: transform 0.25s ease;
+  position: relative;
+}
+#upgrade-modal-overlay.visible .upgrade-modal-box {
+  transform: translateY(0);
+}
+.upgrade-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--ink3);
+  transition: color 0.15s;
+  line-height: 1;
+}
+.upgrade-close:hover { color: var(--ink); }
+.upgrade-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.upgrade-subtitle {
+  font-size: 13px;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media(max-width:480px){
+  .upgrade-grid { grid-template-columns: 1fr; }
+}
+.upgrade-card {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+  transition: border-color 0.15s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.upgrade-card:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.upgrade-card.featured {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, #fffdf5, #fff);
+  position: relative;
+}
+.upgrade-card.featured::before {
+  content: 'BEST VALUE / SAVES £59';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.upgrade-card-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.upgrade-card-price {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1;
+}
+.upgrade-card-freq {
+  font-size: 11px;
+  color: var(--ink3);
+  margin-bottom: 16px;
+  display: block;
+}
+.upgrade-features-list {
+  list-style: none;
+  font-size: 12px;
+  color: var(--ink2);
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-grow: 1;
+}
+.upgrade-features-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+}
+.upgrade-features-list li::before {
+  content: '✓';
+  color: var(--success);
+  font-weight: bold;
+}
+.upgrade-card-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+.upgrade-card-btn:hover { opacity: 0.9; }
+.upgrade-card.featured .upgrade-card-btn {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+/* ─── NEW STYLES: TABS & WIZARD FLOW ─── */
+.wizard-container {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.wizard-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media(max-width: 640px) {
+  .wizard-options { grid-template-columns: 1fr; }
+}
+.wizard-card {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  background: var(--paper);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.wizard-card:hover {
+  border-color: var(--ink3);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.wizard-card.active {
+  border-color: var(--ink);
+  background: var(--paper2);
+  box-shadow: var(--shadow);
+}
+.wizard-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+.wizard-card-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.wizard-card-desc {
+  font-size: 12px;
+  color: var(--ink3);
+  line-height: 1.5;
+}
+
+/* ─── BUILT-FOR STRIP ─── */
+.built-for-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 28px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.built-for-label {
+  color: var(--accent);
+  font-weight: 700;
+}
+.trust-strip{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.trust-item{
+  font-size:11px;
+  color:#d7d1c2;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:6px;
+  padding:6px 10px;
+}
+.revenue-note{
+  max-width:760px;
+  margin:18px auto 0;
+  padding:10px 14px;
+  border:1px solid rgba(201,168,38,.35);
+  border-radius:8px;
+  background:rgba(201,168,38,.08);
+  color:#d7c37a;
+  font-size:12px;
+  line-height:1.5;
+}
+
+/* ─── EXAMPLE OUTPUTS SECTION ─── */
+.example-section {
+  padding: 40px 0 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+.example-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.example-card-preview {
+  height: 140px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+.example-card-body {
+  padding: 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.example-card-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent2);
+  margin-bottom: 4px;
+}
+.example-card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.example-card-desc {
+  font-size: 12px;
+  color: var(--ink3);
+  line-height: 1.5;
+}
+
+/* ─── PRO LOCK INDICATORS & BADGES ─── */
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--ink);
+  letter-spacing: 0.03em;
+  margin-left: 6px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.pro-locked-tab {
+  position: relative;
+}
+.pro-locked-tab::after {
+  content: '🔒';
+  font-size: 9px;
+  margin-left: 4px;
+}
+
+/* ─── FOUNDER NOTE CARD ─── */
+.founder-note-card {
+  background: linear-gradient(135deg, var(--paper2) 0%, var(--paper3) 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media(max-width: 480px) {
+  .founder-note-card { flex-direction: column; align-items: center; text-align: center; }
+}
+.founder-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  border: 2px solid #fff;
+}
+.founder-text {
+  font-size: 12.5px;
+  color: var(--ink2);
+  line-height: 1.6;
+  text-align: left;
+}
+.founder-sign {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: bold;
+  margin-top: 8px;
+  display: block;
+}
+
+/* ─── USE CASES / HOW IT HELPS ─── */
+.use-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+.use-case-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+.use-case-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.use-case-role {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
+}
+.use-case-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.use-case-desc {
+  font-size: 12px;
+  color: var(--ink3);
+  line-height: 1.55;
+}
+</style>
+</head>
+<body>
+
+<!-- USER TYPE OVERLAY -->
+<div id="user-type-overlay">
+  <div class="utype-box">
+    <div class="utype-title">Welcome to Brand Colour Studio</div>
+    <div class="utype-sub">Tell us who you are and we'll personalise everything for you — palette recommendations, previews and export formats.</div>
+    <div class="utype-grid" id="utype-grid">
+      <div class="utype-card" data-type="designer" onclick="selectUType(this)">
+        <div class="utype-icon">🖥️</div>
+        <span class="utype-label">Web Designer</span>
+        <div class="utype-desc">I build sites for clients</div>
+      </div>
+      <div class="utype-card" data-type="reports" onclick="selectUType(this)">
+        <div class="utype-icon">📊</div>
+        <span class="utype-label">Report Writer</span>
+        <div class="utype-desc">Consultant, analyst, HR</div>
+      </div>
+      <div class="utype-card" data-type="business" onclick="selectUType(this)">
+        <div class="utype-icon">🏪</div>
+        <span class="utype-label">Business Owner</span>
+        <div class="utype-desc">Building my own brand</div>
+      </div>
+      <div class="utype-card" data-type="agency" onclick="selectUType(this)">
+        <div class="utype-icon">🏢</div>
+        <span class="utype-label">Agency / Studio</span>
+        <div class="utype-desc">Team of 2–15 people</div>
+      </div>
+      <div class="utype-card" data-type="developer" onclick="selectUType(this)">
+        <div class="utype-icon">👨‍💻</div>
+        <span class="utype-label">Developer</span>
+        <div class="utype-desc">I build apps & tools</div>
+      </div>
+      <div class="utype-card" data-type="creator" onclick="selectUType(this)">
+        <div class="utype-icon">🎨</div>
+        <span class="utype-label">Creator</span>
+        <div class="utype-desc">Social, content, blog</div>
+      </div>
+    </div>
+    <button class="btn-utype-start" onclick="startApp()" id="utype-start-btn">Continue →</button>
+    <span class="skip-link" onclick="skipUType()">Skip — browse everything</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="flex gap4">
+    <span class="logo-text">Brand Colour Studio</span>
+    <span class="logo-sub">by meetingpipeline.com</span>
+  </div>
+  <div class="header-right">
+    <span id="user-chip" onclick="showUserTypeOverlay()">👤 <span id="user-type-label">All users</span></span>
+    <button class="header-btn btn-outline" onclick="showTab('pricing')">Pricing</button>
+    <button class="header-btn btn-cta" onclick="document.getElementById('pro-cta').scrollIntoView({behavior:'smooth'})">Get Pro</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-label">The world's first brand colour pipeline tool</div>
+  <h1 class="hero-title">Ship your brand colours in <span>5 minutes</span>,<br>not 5 revisions.</h1>
+  <p class="hero-sub">Upload a logo or answer 3 quick questions. Brand Colour Studio builds your entire colour system – palette, roles, accessibility checks, and a client-ready PDF kit – with export-ready CSS and AI prompts.</p>
+  <div class="hero-actions">
+    <button class="btn-hero-primary" onclick="showTab('start');document.getElementById('app').scrollIntoView({behavior:'smooth'})">Start free – build my palette</button>
+    <button class="btn-hero-secondary" onclick="document.getElementById('example-outputs').scrollIntoView({behavior:'smooth'})">See examples</button>
+  </div>
+  <div class="hero-pills">
+    <span class="hero-pill">✓ 30+ curated palettes</span>
+    <span class="hero-pill">✓ PDF brand kit</span>
+    <span class="hero-pill">✓ Client approval links</span>
+    <span class="hero-pill">✓ AI prompt export</span>
+    <span class="hero-pill">✓ WCAG accessibility</span>
+    <span class="hero-pill">✓ CSS/Tailwind export</span>
+  </div>
+  <div class="built-for-strip">
+    <span class="built-for-label">Built for:</span> freelance web designers &nbsp;·&nbsp; no-code builders &nbsp;·&nbsp; solo founders
+  </div>
+  <div class="trust-strip" aria-label="Product trust signals">
+    <span class="trust-item">Private by design: logo extraction runs in-browser</span>
+    <span class="trust-item">Accessible palettes with WCAG contrast checks</span>
+    <span class="trust-item">Export-ready CSS, PDF and client approval workflows</span>
+  </div>
+  <div class="revenue-note">Early-access lifetime deal: get Pro exports, approval flows and future updates for a one-time launch price.</div>
+</section>
+
+<!-- EXAMPLE OUTPUTS SECTION -->
+<section id="example-outputs" class="example-section" style="max-width:1160px;margin:0 auto;padding:40px 16px 20px;text-align:center">
+  <h2 style="font-family:var(--font-display);font-size:24px;font-weight:900;color:var(--ink);margin-bottom:8px">Client-Ready Deliverables in 5 Minutes</h2>
+  <p style="font-size:13px;color:var(--ink3);max-width:600px;margin:0 auto 24px">See what freelance designers, agency teams, and solo SaaS founders build and export with Brand Colour Studio.</p>
+  <div class="example-grid">
+    <!-- Card 1 -->
+    <div class="example-card">
+      <div class="example-card-preview" style="background:#0b2b2d;color:#fff;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:18px;font-family:var(--font-display);font-weight:bold">Midnight Teal</div>
+          <div style="font-size:10px;opacity:0.7">BCP-007 · Premium SaaS</div>
+          <div style="display:flex;gap:4px;margin-top:10px;justify-content:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:#0b2b2d;border:1px solid #fff"></div>
+            <div style="width:20px;height:20px;border-radius:50%;background:#0e7e82;border:1px solid #fff"></div>
+            <div style="width:20px;height:20px;border-radius:50%;background:#5ec7ca;border:1px solid #fff"></div>
+            <div style="width:20px;height:20px;border-radius:50%;background:#e0f5f6;border:1px solid #fff"></div>
+            <div style="width:20px;height:20px;border-radius:50%;background:#f4fbfc;border:1px solid #fff"></div>
+          </div>
+        </div>
+      </div>
+      <div class="example-card-body">
+        <span class="example-card-tag">Brand Kit PDF</span>
+        <h3 class="example-card-title">Client-Ready Style Guide</h3>
+        <p class="example-card-desc">A beautiful, multi-page vector PDF containing contrast ratios, print codes (CMYK/RGB), font pairings, and AI generation prompts for brand collateral.</p>
+      </div>
+    </div>
+    <!-- Card 2 -->
+    <div class="example-card">
+      <div class="example-card-preview" style="background:#f2f1ee;color:var(--ink);display:flex;align-items:center;justify-content:center;padding:10px">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;width:100%;text-align:left;box-shadow:var(--shadow);box-sizing:border-box">
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:8px">
+            <div style="width:24px;height:8px;border-radius:2px;background:#0A2E52"></div>
+            <div style="display:flex;gap:2px;margin-left:auto">
+              <div style="width:12px;height:4px;border-radius:1px;background:#1A6B9A"></div>
+              <div style="width:12px;height:4px;border-radius:1px;background:#1A6B9A"></div>
+            </div>
+          </div>
+          <div style="width:70%;height:8px;background:#0A2E52;border-radius:2px;margin-bottom:4px"></div>
+          <div style="width:90%;height:5px;background:#9a9a9a;border-radius:1px;opacity:0.4;margin-bottom:8px"></div>
+          <div style="width:40px;height:12px;background:#1A6B9A;border-radius:3px"></div>
+        </div>
+      </div>
+      <div class="example-card-body">
+        <span class="example-card-tag">Live Mockup Preview</span>
+        <h3 class="example-card-title">Interactive Live Previews</h3>
+        <p class="example-card-desc">Instantly preview your brand system applied to high-fidelity mockups of websites and business reports, supporting instant Light/Dark mode toggling.</p>
+      </div>
+    </div>
+    <!-- Card 3 -->
+    <div class="example-card">
+      <div class="example-card-preview" style="background:#0f0f0f;color:#e8e8e8;display:flex;align-items:center;justify-content:center;padding:12px">
+        <div style="font-family:var(--font-mono);font-size:9.5px;padding:8px 12px;width:100%;margin:0;background:#1c1c1e;border-radius:6px;text-align:left;line-height:1.45;color:#f4a261">:root {<br>&nbsp;&nbsp;--brand-primary: <span style="color:#e9c46a">#3D00C8</span>;<br>&nbsp;&nbsp;--brand-accent: <span style="color:#2a9d8f">#7B4FFF</span>;<br>&nbsp;&nbsp;--brand-surface: <span style="color:#e76f51">#FAFAFA</span>;<br>}</div>
+      </div>
+      <div class="example-card-body">
+        <span class="example-card-tag">Export Code</span>
+        <h3 class="example-card-title">CSS & Tailwind Configurations</h3>
+        <p class="example-card-desc">No more manual copy-pasting. Export clean, production-ready CSS variables, SCSS variables, or a complete Tailwind theme extension block instantly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PALETTE OF THE WEEK -->
+<div id="app" style="padding-top:24px">
+<div id="app-inner" style="max-width:1160px;margin:0 auto;padding:0 16px">
+
+<div class="week-section">
+  <div class="week-eyebrow">🏆 Palette of the Week</div>
+  <div class="week-title" id="week-name">Midnight Teal</div>
+  <div class="week-body" id="week-body">This week's featured palette is trusted by data-driven brands worldwide. Deep teal conveys precision and trustworthiness — perfect for dashboards, analytics platforms, and fintech reports. Featured because it satisfies WCAG AA contrast on all text colours.</div>
+  <div class="week-swatches" id="week-swatches"></div>
+  <button class="action-btn" style="margin-top:12px" onclick="selectPaletteByCode('BCP-007')">Use this palette →</button>
+</div>
+
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <button class="main-tab active" onclick="showTab('start')">Start Here ⚡</button>
+  <button class="main-tab" onclick="showTab('browse')">Browse Palettes</button>
+  <button class="main-tab" onclick="showTab('custom')">Custom Mixer</button>
+  <button class="main-tab" onclick="showTab('pricing')">Pricing</button>
+</div>
+
+<!-- ══ TAB: START (Onboarding Wizard) ══ -->
+<div class="tab-panel active" id="tab-start">
+  <div class="section-header">
+    <div class="section-title">Launch Your Brand System</div>
+    <div class="section-desc">Choose a path to build your brand colour palette in less than 5 minutes. No server uploads — processed 100% locally.</div>
+  </div>
+
+  <div class="wizard-container">
+    <div class="wizard-options">
+      <!-- Option A: Logo Upload -->
+      <div class="wizard-card active" id="wizard-card-logo" onclick="toggleWizardPath('logo')">
+        <div class="wizard-icon">🎨</div>
+        <div class="wizard-card-title">Extract From Brand Logo</div>
+        <div class="wizard-card-desc">Drop your logo or brand graphic to automatically extract matching, professional hex color codes in seconds.</div>
+      </div>
+      <!-- Option B: Questionnaire -->
+      <div class="wizard-card" id="wizard-card-quiz" onclick="toggleWizardPath('quiz')">
+        <div class="wizard-icon">⚡</div>
+        <div class="wizard-card-title">Answer 3 Quick Questions</div>
+        <div class="wizard-card-desc">Answer 3 brief questions about your sector, brand mood, and audience to get matched with high-performing palettes.</div>
+      </div>
+    </div>
+
+    <!-- Path A Container: Logo Extractor (Visible by default) -->
+    <div id="wizard-path-logo" class="wizard-path-content">
+      <div style="margin-top: 24px;">
+        <div id="logo-upload-area" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleLogoDrop(event)">
+          <input type="file" accept="image/*" onchange="extractLogoColors(this.files[0])">
+          <div class="upload-icon">📁</div>
+          <div class="upload-label">Drop your brand logo here or click to browse</div>
+          <div class="upload-sub">Supports PNG, JPG, SVG. Processed entirely in your browser — your assets are never uploaded.</div>
+        </div>
+        <div id="logo-extracted">
+          <img id="logo-preview-img" src="" alt="Uploaded logo">
+          <div class="bold mb8" style="text-align: left;">Extracted colours — click to select for your palette:</div>
+          <div class="extracted-swatches" id="ext-swatches"></div>
+          <button class="ext-build-btn" onclick="buildLogopalette()">Build palette from selected colours →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Path B Container: Questionnaire (Hidden by default) -->
+    <div id="wizard-path-quiz" class="wizard-path-content hidden">
+      <div style="margin-top: 24px; text-align: left;">
+        <div id="questionnaire">
+          <div class="q-progress"><div class="q-dot done" id="qd1"></div><div class="q-dot" id="qd2"></div><div class="q-dot" id="qd3"></div></div>
+          <!-- Step 1 -->
+          <div class="q-step active" id="qs1">
+            <div class="q-label">Step 1 of 3</div>
+            <div class="q-question">What is your industry or sector?</div>
+            <div class="q-options" id="qopt1">
+              <div class="q-option" data-val="finance" onclick="qSelect(this,'q1')"><div class="q-option-icon">💼</div><div class="q-option-text">Finance & Legal</div></div>
+              <div class="q-option" data-val="tech" onclick="qSelect(this,'q1')"><div class="q-option-icon">💻</div><div class="q-option-text">Tech & SaaS</div></div>
+              <div class="q-option" data-val="health" onclick="qSelect(this,'q1')"><div class="q-option-icon">🏥</div><div class="q-option-text">Health & Wellness</div></div>
+              <div class="q-option" data-val="food" onclick="qSelect(this,'q1')"><div class="q-option-icon">🍽️</div><div class="q-option-text">Food & Hospitality</div></div>
+              <div class="q-option" data-val="creative" onclick="qSelect(this,'q1')"><div class="q-option-icon">🎨</div><div class="q-option-text">Creative & Agency</div></div>
+              <div class="q-option" data-val="corporate" onclick="qSelect(this,'q1')"><div class="q-option-icon">🏢</div><div class="q-option-text">Corporate & Consulting</div></div>
+              <div class="q-option" data-val="retail" onclick="qSelect(this,'q1')"><div class="q-option-icon">🛍️</div><div class="q-option-text">Retail & Lifestyle</div></div>
+              <div class="q-option" data-val="education" onclick="qSelect(this,'q1')"><div class="q-option-icon">📚</div><div class="q-option-text">Education & NGO</div></div>
+            </div>
+            <div class="q-nav"><span></span><button class="btn-q-next" id="qnext1" onclick="qNext(2)" disabled>Next →</button></div>
+          </div>
+          <!-- Step 2 -->
+          <div class="q-step" id="qs2">
+            <div class="q-label">Step 2 of 3</div>
+            <div class="q-question">What mood should your brand convey?</div>
+            <div class="q-options" id="qopt2">
+              <div class="q-option" data-val="trust" onclick="qSelect(this,'q2')"><div class="q-option-icon">🤝</div><div class="q-option-text">Trust & Authority</div></div>
+              <div class="q-option" data-val="energy" onclick="qSelect(this,'q2')"><div class="q-option-icon">⚡</div><div class="q-option-text">Energy & Bold</div></div>
+              <div class="q-option" data-val="calm" onclick="qSelect(this,'q2')"><div class="q-option-icon">🌿</div><div class="q-option-text">Calm & Natural</div></div>
+              <div class="q-option" data-val="luxury" onclick="qSelect(this,'q2')"><div class="q-option-icon">✨</div><div class="q-option-text">Luxury & Premium</div></div>
+              <div class="q-option" data-val="modern" onclick="qSelect(this,'q2')"><div class="q-option-icon">🔮</div><div class="q-option-text">Modern & Innovative</div></div>
+              <div class="q-option" data-val="warm" onclick="qSelect(this,'q2')"><div class="q-option-icon">☀️</div><div class="q-option-text">Warm & Friendly</div></div>
+            </div>
+            <div class="q-nav"><span class="btn-q-back" onclick="qNext(1)">← Back</span><button class="btn-q-next" id="qnext2" onclick="qNext(3)" disabled>Next →</button></div>
+          </div>
+          <!-- Step 3 -->
+          <div class="q-step" id="qs3">
+            <div class="q-label">Step 3 of 3</div>
+            <div class="q-question">Who is your primary audience?</div>
+            <div class="q-options" id="qopt3">
+              <div class="q-option" data-val="b2b" onclick="qSelect(this,'q3')"><div class="q-option-icon">🏢</div><div class="q-option-text">Businesses (B2B)</div></div>
+              <div class="q-option" data-val="consumer" onclick="qSelect(this,'q3')"><div class="q-option-icon">👥</div><div class="q-option-text">Consumers (B2C)</div></div>
+              <div class="q-option" data-val="professional" onclick="qSelect(this,'q3')"><div class="q-option-icon">👔</div><div class="q-option-text">Professionals</div></div>
+              <div class="q-option" data-val="young" onclick="qSelect(this,'q3')"><div class="q-option-icon">🎯</div><div class="q-option-text">Young / Gen Z</div></div>
+            </div>
+            <div class="q-nav"><span class="btn-q-back" onclick="qNext(2)">← Back</span><button class="btn-q-next" id="qnext3" onclick="showResults()" disabled>See My Palettes →</button></div>
+          </div>
+          <!-- Results -->
+          <div class="q-results" id="q-results">
+            <div class="section-header" style="margin-bottom:16px; border-bottom: none; padding-bottom: 0;">
+              <div class="section-title">Your Top Matches</div>
+              <div class="section-desc" id="q-results-desc"></div>
+            </div>
+            <div id="result-cards"></div>
+            <button class="action-btn" style="margin-top:8px" onclick="resetQuestionnaire()">← Retake questionnaire</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB: BROWSE ══ -->
+<div class="tab-panel" id="tab-browse">
+  <div class="filter-bar">
+    <input class="filter-search" type="text" id="pal-search" placeholder="Search by name, industry…" oninput="renderPalettes()">
+    <div id="tag-filters"></div>
+  </div>
+  <div class="pal-grid" id="pal-grid"></div>
+</div>
+
+<!-- ══ TAB: CUSTOM MIXER ══ -->
+<div class="tab-panel" id="tab-custom">
+  <div class="section-header">
+    <div class="section-title">Custom Colour Mixer</div>
+    <div class="section-desc">Build your own palette from scratch. Name it, assign a code, and generate your brand kit.</div>
+  </div>
+  <div class="mixer-grid">
+    <div class="mixer-slot"><div class="mx-label">Primary</div><div class="mx-preview" id="mxp-primary"></div><div class="mx-row"><label>Colour</label><input type="color" id="mxc-primary" value="#0A2E52" oninput="syncMix('primary',this.value)"><input type="text" id="mxt-primary" value="#0A2E52" oninput="syncMixText('primary',this.value)" maxlength="7" class="mono"></div><div class="mx-row"><label>Role</label><input type="text" id="mxr-primary" value="Headings, nav, key CTAs"></div></div>
+    <div class="mixer-slot"><div class="mx-label">Accent</div><div class="mx-preview" id="mxp-accent"></div><div class="mx-row"><label>Colour</label><input type="color" id="mxc-accent" value="#1A6B9A" oninput="syncMix('accent',this.value)"><input type="text" id="mxt-accent" value="#1A6B9A" oninput="syncMixText('accent',this.value)" maxlength="7" class="mono"></div><div class="mx-row"><label>Role</label><input type="text" id="mxr-accent" value="Buttons, links, highlights"></div></div>
+    <div class="mixer-slot"><div class="mx-label">Secondary</div><div class="mx-preview" id="mxp-secondary"></div><div class="mx-row"><label>Colour</label><input type="color" id="mxc-secondary" value="#5BAFD6" oninput="syncMix('secondary',this.value)"><input type="text" id="mxt-secondary" value="#5BAFD6" oninput="syncMixText('secondary',this.value)" maxlength="7" class="mono"></div><div class="mx-row"><label>Role</label><input type="text" id="mxr-secondary" value="Charts, icons, borders"></div></div>
+    <div class="mixer-slot"><div class="mx-label">Background Tint</div><div class="mx-preview" id="mxp-tint"></div><div class="mx-row"><label>Colour</label><input type="color" id="mxc-tint" value="#D6EAF5" oninput="syncMix('tint',this.value)"><input type="text" id="mxt-tint" value="#D6EAF5" oninput="syncMixText('tint',this.value)" maxlength="7" class="mono"></div><div class="mx-row"><label>Role</label><input type="text" id="mxr-tint" value="Section backgrounds, cards"></div></div>
+  </div>
+  <div class="mx-meta">
+    <input type="text" id="mx-name" placeholder="Palette name (e.g. My Brand)">
+    <input type="text" id="mx-code" placeholder="Your code (e.g. BCP-CUSTOM)" class="mono">
+  </div>
+  <div id="mix-live-preview" style="margin-bottom:16px"></div>
+  <div class="action-bar" style="border-top:none;padding-top:0">
+    <button class="action-btn primary" onclick="useMixerPalette()"><span class="icon">✓</span> Use this palette</button>
+    <button class="action-btn" onclick="generateMixerPDF()"><span class="icon">📄</span> Download PDF brand kit</button>
+  </div>
+</div>
+
+<!-- ══ TAB: PRICING ══ -->
+<div class="tab-panel" id="tab-pricing">
+  <div id="pricing-section">
+    <div class="section-header">
+      <div class="section-title">Simple, honest pricing</div>
+      <div class="section-desc">Start free. Upgrade to unlock advanced developer exports and client-ready PDFs. No contracts.</div>
+    </div>
+    
+    <!-- USE CASES GRID -->
+    <div class="use-cases-grid">
+      <!-- Card 1 -->
+      <div class="use-case-card">
+        <div class="use-case-icon">🖥️</div>
+        <div class="use-case-role">Freelance Web Designers</div>
+        <div class="use-case-title">Stop 10-email colour debates</div>
+        <div class="use-case-desc">Design a beautiful, modern palette for your client and send a one-click approval link. Let them approve their system on a live website mockup.</div>
+      </div>
+      <!-- Card 2 -->
+      <div class="use-case-card">
+        <div class="use-case-icon">⚡</div>
+        <div class="use-case-role">Solo Founders & Builders</div>
+        <div class="use-case-title">Copy variables directly into code</div>
+        <div class="use-case-desc">Launch in hours. Generate your color palette and copy production-ready CSS variables or a complete Tailwind CSS extension config block in one click.</div>
+      </div>
+      <!-- Card 3 -->
+      <div class="use-case-card">
+        <div class="use-case-icon">🏢</div>
+        <div class="use-case-role">Agencies & Studios</div>
+        <div class="use-case-title">Client-ready PDFs in pitch decks</div>
+        <div class="use-case-desc">Instantly download an elegant, professional PDF brand kit containing exact HEX, RGB, CMYK values, color roles, contrast tests, and typography pairs to present to stakeholders.</div>
+      </div>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Free Card -->
+      <div class="price-card">
+        <div class="price-name">Free Plan</div>
+        <div class="price-amount">£0</div>
+        <span class="price-freq">forever</span>
+        <div class="price-feat"><span class="pf-icon">✓</span>Browse all 30+ named palettes</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Live website & report previews</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Copy hex codes</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>WCAG accessibility score</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Colour psychology notes</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Custom colour mixer</div>
+        <div class="price-feat" style="opacity:.4"><span class="pf-icon">✗</span>PDF brand kit download</div>
+        <div class="price-feat" style="opacity:.4"><span class="pf-icon">✗</span>Client approval links</div>
+        <div class="price-feat" style="opacity:.4"><span class="pf-icon">✗</span>Tailwind & SCSS exports</div>
+        <button class="price-btn" onclick="toast('You\'re already on the Free plan — enjoy!')">Current plan</button>
+      </div>
+      
+      <!-- Pro Card -->
+      <div class="price-card featured" id="pro-cta">
+        <div class="price-badge">MOST POPULAR</div>
+        <div class="price-name">Professional</div>
+        <div class="price-amount">£9 <span style="font-size: 14px; font-weight: normal; opacity: 0.8;">/ mo</span></div>
+        <span class="price-freq">or £49 one-time (Lifetime Access)</span>
+        <div class="price-feat"><span class="pf-icon">✓</span>Everything in Free</div>
+        <div class="price-feat"><span class="pf-icon">✓</span><strong>PDF Brand Kit</strong> generator</div>
+        <div class="price-feat"><span class="pf-icon">✓</span><strong>Client Approval</strong> links (unlimited)</div>
+        <div class="price-feat"><span class="pf-icon">✓</span><strong>Tailwind & SCSS</strong> code export</div>
+        <div class="price-feat"><span class="pf-icon">✓</span><strong>AI prompt</strong> exports (ChatGPT, Midjourney)</div>
+        <div class="price-feat"><span class="pf-icon">✓</span><strong>Social Card</strong> PNG generator</div>
+        <div class="price-feat"><span class="pf-icon">✓</span><strong>Dark mode</strong> palette generator</div>
+        <button class="price-btn" onclick="openUpgradeModal('pricing')">Unlock Pro Access →</button>
+      </div>
+      
+      <!-- Agency Card (Muted) -->
+      <div class="price-card" style="opacity: 0.55;">
+        <div class="price-name" style="color: var(--accent2);">Agency (Future)</div>
+        <div class="price-amount">£49</div>
+        <span class="price-freq">per month — launching soon</span>
+        <div class="price-feat"><span class="pf-icon">✓</span>Everything in Professional</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>White-label — your logo, your brand</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Embeddable widget for your site</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Typography pairings guides</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Custom palette uploading</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Priority support</div>
+        <button class="price-btn" style="background: var(--border); color: var(--ink3); cursor: not-allowed;" disabled>Launching soon</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;font-size:12px;color:var(--ink3)">💳 Payments powered by Stripe &nbsp;·&nbsp; Cancel any time &nbsp;·&nbsp; No hidden fees &nbsp;·&nbsp; <a href="mailto:hello@meetingpipeline.com" style="color:var(--ink3)">hello@meetingpipeline.com</a></div>
+
+    <!-- FOUNDER NOTE -->
+    <div class="founder-note-card">
+      <div class="founder-avatar">👨‍💻</div>
+      <div class="founder-text">
+        <strong>A Note from the Founder:</strong>
+        <p style="margin-top: 4px;">"I got completely tired of managing endless back-and-forth email chains with clients just to get brand color approval. That's why I built Brand Colour Studio. It runs 100% locally in your browser. Absolutely zero images or asset files are ever uploaded to any server, keeping your client's brand intellectual property completely secure and private. Enjoy the friction-free approvals!"</p>
+        <span class="founder-sign">— Founder, Brand Colour Studio</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PALETTE DETAIL PANEL (shown when palette selected) ══ -->
+<div id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-swatches-row" id="dp-swatches"></div>
+    <div class="detail-info">
+      <div class="detail-code" id="dp-code"></div>
+      <div class="detail-name" id="dp-name"></div>
+      <div class="detail-desc" id="dp-desc"></div>
+      <div class="detail-wcag" id="dp-wcag"></div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="dark-toggle" onclick="toggleDarkMode()">
+          <span class="toggle-track" id="dark-track"><span class="toggle-knob"></span></span>
+          <span>Dark mode</span>
+        </span>
+        <span class="pill" id="dp-week-pill" style="display:none;background:var(--accent);color:var(--ink);border-color:var(--accent)">⭐ This week's pick</span>
+      </div>
+    </div>
+  </div>
+  <div class="color-details-grid" id="dp-color-grid"></div>
+  <div class="preview-toggle-bar">
+    <button class="ptoggle active" onclick="switchPreview('website',this)">🌐 Website</button>
+    <button class="ptoggle" onclick="switchPreview('report',this)">📄 Report</button>
+  </div>
+  <div id="preview-website" class="mock-container">
+    <div class="mock-nav" id="mn-nav">
+      <div class="mock-logo-block" id="mn-logo"></div>
+      <div class="mock-nav-links">
+        <div class="mock-nav-link" id="mn-l1"></div>
+        <div class="mock-nav-link" id="mn-l2"></div>
+        <div class="mock-nav-link" id="mn-l3"></div>
+      </div>
+    </div>
+    <div class="mock-hero-area" id="mn-hero">
+      <div class="mock-text-col">
+        <div class="mock-h1" id="mn-h1"></div>
+        <div class="mock-h2" id="mn-h2"></div>
+        <div class="mock-h3" id="mn-h3"></div>
+        <div class="mock-btn-block" id="mn-btn"></div>
+      </div>
+      <div class="mock-hero-img" id="mn-img"></div>
+    </div>
+    <div class="mock-cards-row" id="mn-cards-row">
+      <div class="mock-mini-card" id="mn-c1"></div>
+      <div class="mock-mini-card" id="mn-c2"></div>
+      <div class="mock-mini-card" id="mn-c3"></div>
+    </div>
+    <div class="mock-footer" id="mn-footer"><div class="mock-footer-text" id="mn-ft"></div></div>
+  </div>
+  <div id="preview-report" class="mock-container hidden">
+    <div class="report-mock" id="rep-mock">
+      <div class="rep-header" id="rep-hdr">
+        <div class="rep-logo-block" id="rep-logo"></div>
+        <div class="rep-title-col"><div class="rep-title" id="rep-ttl"></div><div class="rep-subtitle" id="rep-sub"></div></div>
+      </div>
+      <div class="rep-section-bar" id="rep-bar1"><div class="rep-section-label"></div></div>
+      <div class="rep-body-rows"><div class="rep-row" id="rep-r1" style="width:92%"></div><div class="rep-row" id="rep-r2" style="width:78%"></div><div class="rep-row" id="rep-r3" style="width:85%"></div></div>
+      <div class="rep-kpis" id="rep-kpis"><div class="rep-kpi" id="rk1"></div><div class="rep-kpi" id="rk2"></div><div class="rep-kpi" id="rk3"></div></div>
+      <div class="rep-section-bar" id="rep-bar2" style="margin-top:10px"><div class="rep-section-label"></div></div>
+      <div class="rep-chart-area" id="rep-chart">
+        <div class="rep-bar" id="rb1" style="height:70%"></div>
+        <div class="rep-bar" id="rb2" style="height:90%"></div>
+        <div class="rep-bar" id="rb3" style="height:55%"></div>
+        <div class="rep-bar" id="rb4" style="height:80%"></div>
+        <div class="rep-bar" id="rb5" style="height:65%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="action-bar">
+    <button class="action-btn primary" onclick="openExportPanel('pdf')"><span class="icon">📄</span> Download Brand Kit PDF</button>
+    <button class="action-btn" onclick="openExportPanel('client')"><span class="icon">🔗</span> Client Approval Link</button>
+    <button class="action-btn" onclick="openExportPanel('ai')"><span class="icon">🤖</span> AI Prompt Export</button>
+    <button class="action-btn" onclick="openExportPanel('css')"><span class="icon">💻</span> CSS / Tailwind</button>
+    <button class="action-btn" onclick="openExportPanel('social')"><span class="icon">📸</span> Social Card</button>
+    <button class="action-btn" onclick="openExportPanel('embed')"><span class="icon">🔌</span> Embed Widget</button>
+    <button class="action-btn" onclick="sharePalette()"><span class="icon">📢</span> Share Palette</button>
+  </div>
+  <!-- EXPORT PANEL -->
+  <div id="export-panel">
+    <div class="export-tabs">
+      <button class="etab active" id="etab-pdf" onclick="switchEtab('pdf',this)">PDF Brand Kit</button>
+      <button class="etab" id="etab-client" onclick="switchEtab('client',this)">Client Link</button>
+      <button class="etab" id="etab-ai" onclick="switchEtab('ai',this)">AI Prompts</button>
+      <button class="etab" id="etab-css" onclick="switchEtab('css',this)">CSS / Tailwind</button>
+      <button class="etab" id="etab-social" onclick="switchEtab('social',this)">Social Card</button>
+      <button class="etab" id="etab-embed" onclick="switchEtab('embed',this)">Embed</button>
+    </div>
+    <!-- PDF panel -->
+    <div class="epanel active" id="epanel-pdf">
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:14px;line-height:1.6">Your brand kit PDF includes: colour swatches with all codes (HEX, RGB, CMYK), colour roles & usage guide, WCAG accessibility score, recommended Google Font pairings, and your AI prompt. Generated entirely in your browser — nothing is sent to any server.</p>
+      <button class="action-btn primary" onclick="generatePDF()"><span class="icon">⬇️</span> Generate & Download PDF</button>
+    </div>
+    <!-- Client Link panel -->
+    <div class="epanel" id="epanel-client">
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:12px;line-height:1.6">Send this link to your client. They'll see the palette on a live website preview and can approve it with one click. You'll receive their choice by email.</p>
+      <div class="client-link-box">
+        <input class="client-link-input" id="client-link-url" readonly>
+        <button class="action-btn" onclick="copyClientLink()">Copy link</button>
+        <button class="action-btn primary" onclick="openClientMailto()">📧 Send via email</button>
+      </div>
+      <div class="mailto-preview" id="mailto-preview"></div>
+    </div>
+    <!-- AI Prompts panel -->
+    <div class="epanel" id="epanel-ai">
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:14px">Copy the prompt for your preferred AI tool. Paste it at the start of any design request.</p>
+      <div id="ai-prompts"></div>
+    </div>
+    <!-- CSS/Tailwind panel -->
+    <div class="epanel" id="epanel-css">
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="filter-chip on" id="css-tab-css" onclick="switchCssTab('css')">CSS Variables</button>
+        <button class="filter-chip" id="css-tab-tailwind" onclick="switchCssTab('tailwind')">Tailwind Config</button>
+        <button class="filter-chip" id="css-tab-scss" onclick="switchCssTab('scss')">SCSS</button>
+      </div>
+      <div id="css-output"></div>
+    </div>
+    <!-- Social Card panel -->
+    <div class="epanel" id="epanel-social">
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:12px">Generate a shareable social media card (1200×630) featuring your palette. Perfect for LinkedIn, Instagram or Pinterest.</p>
+      <button class="action-btn" onclick="generateSocialCard()" style="margin-bottom:12px"><span class="icon">🖼️</span> Generate card</button>
+      <div id="share-canvas-wrapper" style="display:none">
+        <canvas id="share-canvas" width="600" height="315"></canvas>
+        <div style="margin-top:8px">
+          <button class="action-btn primary" onclick="downloadSocialCard()"><span class="icon">⬇️</span> Download PNG</button>
+        </div>
+      </div>
+    </div>
+    <!-- Embed panel -->
+    <div class="epanel" id="epanel-embed">
+      <div class="embed-instructions">Paste this 2-line snippet into any HTML page to embed the full Brand Colour Studio with your branding. Available on Agency plan (£49/mo). The tool runs entirely from meetingpipeline.com — no files to host or maintain.</div>
+      <div class="code-block" id="embed-code-block"><button class="code-copy-btn" onclick="openUpgradeModal('embed')">🔒 Copy</button><span id="embed-code-text"></span></div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:10px">To add white-label branding (your logo, your colours), upgrade to Agency plan and add <code style="background:var(--paper2);padding:1px 5px;border-radius:3px">data-logo="your-logo.png" data-brand="Agency Name"</code></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-inner -->
+</div><!-- /app -->
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-logo">Brand Colour Studio</div>
+  <div>by <a href="https://meetingpipeline.com">meetingpipeline.com</a> &nbsp;·&nbsp; <a href="mailto:hello@meetingpipeline.com">hello@meetingpipeline.com</a></div>
+  <div style="margin-top:8px;font-size:11px;color:#555">© 2026 Meeting Pipeline Ltd &nbsp;·&nbsp; 30+ curated palettes &nbsp;·&nbsp; Generated brand kits include "Brand Colour Studio — meetingpipeline.com"</div>
+</footer>
+
+<!-- UPGRADE MODAL OVERLAY -->
+<div id="upgrade-modal-overlay">
+  <div class="upgrade-modal-box">
+    <span class="upgrade-close" onclick="closeUpgradeModal()">&times;</span>
+    <h2 class="upgrade-title">Unlock Your Complete Brand Kit</h2>
+    <p class="upgrade-subtitle">Get instant access to vector PDF exports, production code variables, custom client approval flows, and AI design generation prompts.</p>
+    
+    <div class="upgrade-grid">
+      <!-- Plan A: Monthly -->
+      <div class="upgrade-card">
+        <span class="upgrade-card-name">PRO MONTHLY</span>
+        <div class="upgrade-card-price">£9</div>
+        <span class="upgrade-card-freq">per month, cancel anytime</span>
+        
+        <ul class="upgrade-features-list">
+          <li><strong>PDF Brand Kit</strong> generator</li>
+          <li><strong>Client Approval</strong> links</li>
+          <li><strong>Tailwind & SCSS</strong> code export</li>
+          <li><strong>AI prompt</strong> exports</li>
+          <li><strong>Social Card</strong> generator</li>
+        </ul>
+        
+        <button class="upgrade-card-btn" onclick="triggerCheckout('monthly')">Choose Pro Monthly</button>
+      </div>
+      
+      <!-- Plan B: Lifetime -->
+      <div class="upgrade-card featured">
+        <span class="upgrade-card-name">LIFETIME ACCESS</span>
+        <div class="upgrade-card-price">£49</div>
+        <span class="upgrade-card-freq">one-time payment, lifetime updates</span>
+        
+        <ul class="upgrade-features-list">
+          <li><strong>Everything in Pro</strong></li>
+          <li><strong>One-time payment</strong> (Save £59/yr)</li>
+          <li><strong>Early-adopter</strong> premium badge</li>
+          <li><strong>Unlimited</strong> custom palettes</li>
+          <li><strong>Priority Support</strong> for custom tools</li>
+        </ul>
+        
+        <button class="upgrade-card-btn" onclick="triggerCheckout('lifetime')">Get Lifetime Deal</button>
+      </div>
+    </div>
+    
+    <div style="text-align:center; font-size:11px; color:var(--ink3);">
+      🔒 Secured by Stripe. No hidden fees. Cancel in 1 click.
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════ JS ═══════════════════════════════════════ -->
+<script>
+// ─── PALETTE DATA ───
+const PALETTES = [
+  {code:"BCP-001",name:"Ocean Executive",desc:"Calm authority, trust",tags:["corporate","finance","reports"],colors:["#0A2E52","#1A6B9A","#5BAFD6","#D6EAF5","#F5F8FA"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["trust"],industry:["finance","corporate"],audience:["b2b","professional"],psychology:"Deep navy and ocean blue communicate institutional trust — used by 80% of the world's top financial brands. Tint layers add airiness without losing gravitas.",week:false},
+  {code:"BCP-002",name:"Sage & Stone",desc:"Natural, grounded, serene",tags:["health","wellness","sustainability"],colors:["#2D4A3E","#4A7B6F","#8BB5A8","#E8F0EE","#F7F9F8"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["calm"],industry:["health","corporate"],audience:["b2c","professional"],psychology:"Forest greens are scientifically linked to reduced stress and increased trust. Ideal for brands that want to feel 'safe' and responsible.",week:false},
+  {code:"BCP-003",name:"Electric Indigo",desc:"Bold, innovative, forward",tags:["tech","startup","saas"],colors:["#3D00C8","#7B4FFF","#C4ADFF","#EDE8FF","#FAFAFA"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["modern","energy"],industry:["tech","creative"],audience:["young","b2b"],psychology:"Purple and violet signal creativity and technological innovation. Khroma-style AI palettes consistently score highest with under-35 tech audiences.",week:false},
+  {code:"BCP-004",name:"Ember & Slate",desc:"Energetic, high-contrast",tags:["creative","agency","marketing"],colors:["#1C1C1E","#E84B2B","#FF8A70","#FFF0EC","#F8F8F8"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["energy"],industry:["creative","retail"],audience:["consumer","young"],psychology:"High-contrast red-on-black commands attention. Research shows orange-red CTAs increase click-through rates by up to 18% versus blue equivalents.",week:false},
+  {code:"BCP-005",name:"Champagne & Onyx",desc:"Premium, refined, timeless",tags:["luxury","finance","hospitality"],colors:["#1A1A1A","#8B7355","#C9B99A","#F5F0E8","#FDFCFB"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["luxury"],industry:["finance","retail"],audience:["professional","consumer"],psychology:"Warm gold on near-black signals exclusivity and heritage — the palette language of premium brands that don't need to shout.",week:false},
+  {code:"BCP-006",name:"Citrus Fresh",desc:"Optimistic, energetic, bold",tags:["food","lifestyle","consumer"],colors:["#1D3A1E","#D4A017","#F5C842","#FFFAE8","#FEFEFE"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["energy","warm"],industry:["food","retail"],audience:["consumer","young"],psychology:"Deep forest green anchoring warm amber and yellow creates a natural vibrancy — signals freshness, provenance and energy without aggression.",week:false},
+  {code:"BCP-007",name:"Midnight Teal",desc:"Data-forward, precise, modern",tags:["tech","finance","analytics"],colors:["#0B2B2D","#0E7E82","#5EC7CA","#E0F5F6","#F4FBFC"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["trust","modern"],industry:["tech","finance"],audience:["b2b","professional"],psychology:"Teal occupies the trust space of blue whilst signalling innovation — the fastest-growing palette choice for fintech and data platforms in 2026.",week:true},
+  {code:"BCP-008",name:"Blush & Charcoal",desc:"Warm, human, editorial",tags:["creative","hr","wellness"],colors:["#2B2B2B","#C0596A","#E8A4B0","#FBEEF0","#FDFAFA"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["warm","calm"],industry:["health","creative"],audience:["professional","consumer"],psychology:"Warm rose against charcoal feels human and approachable without being soft. Widely used in HR, people-first brands and healthcare communications.",week:false},
+  {code:"BCP-009",name:"Royal Plum",desc:"Authoritative, deep creative",tags:["luxury","creative","education"],colors:["#2A0A4A","#7B2D8B","#C47FD5","#F3E8F9","#FCF8FE"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["luxury","modern"],industry:["creative","education"],audience:["consumer","professional"],psychology:"Deep purple historically signals wisdom and luxury. Education and creative brands use it to convey depth and premium quality.",week:false},
+  {code:"BCP-010",name:"Steel & Copper",desc:"Industrial, confident, bold",tags:["construction","engineering","corporate"],colors:["#1E2B36","#B5551A","#E8956A","#FAEEE6","#F9F7F5"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["trust","energy"],industry:["corporate","retail"],audience:["b2b","professional"],psychology:"Steel grey anchors a warm copper accent — projects strength, durability and craftsmanship. Ideal for engineering, construction and manufacturing.",week:false},
+  {code:"BCP-011",name:"Arctic Mint",desc:"Clinical, fresh, precise",tags:["health","tech","pharma"],colors:["#0D3B3E","#1BA0A6","#7DD4D8","#E0F7F8","#F4FCFC"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["calm","trust"],industry:["health","tech"],audience:["b2b","professional"],psychology:"Cool teal-green communicates cleanliness and precision — the palette of choice for pharmaceutical brands, clinical apps and health technology.",week:false},
+  {code:"BCP-012",name:"Forest & Gold",desc:"Established, premium heritage",tags:["finance","legal","corporate"],colors:["#1A2E0D","#8A7A10","#C9B84A","#F6F2D8","#FDFCF5"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["luxury","trust"],industry:["finance","corporate"],audience:["b2b","professional"],psychology:"Forest green with warm gold signals established heritage and prestige. Used by legal firms, investment banks and luxury real estate agencies.",week:false},
+  {code:"BCP-013",name:"Coral Coast",desc:"Warm, vibrant, welcoming",tags:["lifestyle","travel","retail"],colors:["#2C1010","#D94F2A","#F28C6A","#FDEEE8","#FEF9F7"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["energy","warm"],industry:["food","retail"],audience:["consumer","young"],psychology:"Warm coral activates appetite and excitement — proven to work exceptionally well in hospitality, travel and consumer lifestyle brands.",week:false},
+  {code:"BCP-014",name:"Nordic Grey",desc:"Minimal, elegant, clean",tags:["corporate","tech","consulting"],colors:["#1A1A1A","#5A6473","#A8B4C0","#EEF1F4","#F8F9FA"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["trust","modern"],industry:["corporate","tech"],audience:["b2b","professional"],psychology:"Scandinavian grey minimalism communicates quiet confidence — the palette of leading consulting firms, fintech apps and enterprise SaaS.",week:false},
+  {code:"BCP-015",name:"Rose Dust",desc:"Soft, feminine, editorial",tags:["beauty","fashion","wellness"],colors:["#2A1218","#B5465A","#D99AA5","#F8EDF0","#FDF8F9"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["warm","luxury"],industry:["health","creative"],audience:["consumer"],psychology:"Dusty rose signals warmth and approachability. Research shows it increases time-on-page for beauty and wellness audiences by 23% vs neutral palettes.",week:false},
+  {code:"BCP-016",name:"Sunstone",desc:"Optimistic, bold, energising",tags:["startup","creative","education"],colors:["#2C1A00","#E07B00","#F5B84A","#FFF4DC","#FFFBF0"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["energy","warm"],industry:["creative","food"],audience:["young","consumer"],psychology:"Amber and deep orange create energetic optimism — the palette of disruptive startups that want to feel approachable without being blue.",week:false},
+  {code:"BCP-017",name:"Deep Navy",desc:"Classic, reliable, formal",tags:["corporate","legal","finance"],colors:["#0A1628","#1E3A6E","#5A7FBE","#DCE6F5","#F0F4FA"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["trust"],industry:["finance","corporate"],audience:["b2b","professional"],psychology:"The most globally trusted colour palette — used by 70% of FTSE 100 companies. Projects reliability, formality and institutional authority.",week:false},
+  {code:"BCP-018",name:"Olive & Terracotta",desc:"Earthy, artisan, warm",tags:["food","hospitality","retail"],colors:["#2A2400","#A0622A","#D4A068","#F5EAD8","#FDF8F2"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["warm","calm"],industry:["food","retail"],audience:["consumer","professional"],psychology:"Earthy terracotta and olive signal authenticity, artisan craft and Mediterranean warmth — excellent for food, travel and natural product brands.",week:false},
+  {code:"BCP-019",name:"Electric Lime",desc:"Disruptive, youthful, bold",tags:["startup","gaming","creative"],colors:["#1A2000","#6BAA00","#AADB3A","#EEF9C8","#F8FDF0"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["energy","modern"],industry:["tech","creative"],audience:["young"],psychology:"Neon lime green signals disruption and youthful energy — 2026's fastest-rising palette in gaming, DTC startups and Gen Z brands.",week:false},
+  {code:"BCP-020",name:"Storm & Silver",desc:"Powerful, modern, neutral",tags:["tech","corporate","automotive"],colors:["#151820","#3A4560","#8A97B5","#E4E8F2","#F5F6FA"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["trust","modern"],industry:["tech","corporate"],audience:["b2b","professional"],psychology:"Storm blue-grey projects serious competence — the neutral-but-sophisticated palette for automotive tech, B2B platforms and enterprise software.",week:false},
+  {code:"BCP-021",name:"Crimson Noir",desc:"Bold, passionate, premium",tags:["luxury","hospitality","fashion"],colors:["#180000","#9B0020","#D45A72","#F9E0E6","#FDF5F7"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["luxury","energy"],industry:["retail","creative"],audience:["consumer","professional"],psychology:"Deep crimson signals passion, premium quality and bold confidence — the palette of luxury hospitality, premium fashion and exclusive events.",week:false},
+  {code:"BCP-022",name:"Sky & Sand",desc:"Open, airy, aspirational",tags:["travel","real-estate","lifestyle"],colors:["#0C2840","#3480B0","#B0D4F0","#E8F4FC","#F5FAFD"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["calm","trust"],industry:["corporate","retail"],audience:["consumer","b2c"],psychology:"Open sky blue on clean white creates space and aspiration — the language of travel brands, property developers and lifestyle agencies.",week:false},
+  {code:"BCP-023",name:"Charcoal & Peach",desc:"Modern warmth, balanced",tags:["hr","consulting","wellness"],colors:["#1E1E1E","#C86040","#EBA888","#FBF0EB","#FEF9F7"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["warm","calm"],industry:["health","corporate"],audience:["professional","b2c"],psychology:"Peach tones humanise charcoal's authority — creates warmth without loss of professionalism. Perfect for HR, coaching and people-first consulting.",week:false},
+  {code:"BCP-024",name:"Jade & Ivory",desc:"Serene, premium, balanced",tags:["wellness","beauty","luxury"],colors:["#0B2A20","#2A7A58","#88C4A8","#E4F5EE","#F5FBF8"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["calm","luxury"],industry:["health","retail"],audience:["consumer","professional"],psychology:"Deep jade and soft ivory create premium serenity — associated with wellbeing, natural luxury and mindful living brands.",week:false},
+  {code:"BCP-025",name:"Cobalt & Cream",desc:"Sharp, professional, clean",tags:["legal","finance","consulting"],colors:["#001A40","#0044A8","#8AB0E8","#E0EBFB","#F5F8FD"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["trust"],industry:["finance","corporate"],audience:["b2b","professional"],psychology:"Rich cobalt blue with cream accents projects professional confidence — used by leading law firms, accountancy practices and financial advisers.",week:false},
+  {code:"BCP-026",name:"Mango Sorbet",desc:"Fun, playful, modern",tags:["retail","food","startup"],colors:["#2A1000","#E8780A","#FFC06A","#FFF3DC","#FFFAF2"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["energy","warm"],industry:["food","creative"],audience:["young","consumer"],psychology:"Mango orange triggers appetite and positivity — proven to increase conversion rates in food, beverage and impulse-purchase consumer brands.",week:false},
+  {code:"BCP-027",name:"Slate & Fern",desc:"Steady, nature-forward, grounded",tags:["sustainability","corporate","ngo"],colors:["#1A2218","#4A7040","#96B888","#E8F2E4","#F5FAF4"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["calm","trust"],industry:["corporate","health"],audience:["b2b","professional"],psychology:"Muted fern on slate grey signals environmental responsibility and measured confidence — ideal for NGOs, B-corps and sustainability-focused brands.",week:false},
+  {code:"BCP-028",name:"Dusk Purple",desc:"Creative depth, thoughtful",tags:["education","creative","wellness"],colors:["#180A2A","#6040A8","#A888E0","#EDE4FB","#FAF7FE"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["luxury","calm"],industry:["education","creative"],audience:["young","professional"],psychology:"Deep dusk purple communicates wisdom, depth and creative intelligence — favoured by e-learning platforms, editorial brands and creative studios.",week:false},
+  {code:"BCP-029",name:"Umber & Rust",desc:"Grounded, artisan, warm craft",tags:["construction","retail","food"],colors:["#1E1000","#8A3820","#C87850","#F5E8DC","#FDF6F0"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["warm","energy"],industry:["food","corporate"],audience:["consumer","professional"],psychology:"Warm umber and rust signal honest craftsmanship and artisan quality — the authentic palette for makers, tradespeople and premium goods.",week:false},
+  {code:"BCP-030",name:"Cloud & Carbon",desc:"Modern minimal, sleek, precise",tags:["tech","saas","consulting"],colors:["#0A0A0A","#404858","#A0A8B8","#E8EBF2","#F8F9FB"],roles:["Primary","Accent","Secondary","Tint","Surface"],mood:["modern","trust"],industry:["tech","corporate"],audience:["b2b","professional"],psychology:"Monochromatic carbon-to-cloud progression signals quiet technical mastery — the signature palette of leading SaaS companies and product studios.",week:false}
+];
+
+const ALL_TAGS = [...new Set(PALETTES.flatMap(p=>p.tags))].sort();
+const FONT_PAIRS = {
+  "BCP-001":["Libre Baskerville","Source Sans Pro"],"BCP-002":["Raleway","Open Sans"],"BCP-003":["Space Grotesk","Inter"],"BCP-004":["Bebas Neue","Roboto"],"BCP-005":["Cormorant Garamond","Lato"],"BCP-006":["Nunito","Roboto"],"BCP-007":["IBM Plex Sans","IBM Plex Mono"],"BCP-008":["Playfair Display","Lato"],"BCP-009":["Cinzel","Lato"],"BCP-010":["Oswald","Open Sans"],"BCP-011":["Roboto Condensed","Roboto"],"BCP-012":["EB Garamond","Source Sans Pro"],"BCP-013":["Pacifico","Open Sans"],"BCP-014":["Barlow","Barlow"],"BCP-015":["Josefin Sans","Lato"],"BCP-016":["Fredoka One","Nunito"],"BCP-017":["Merriweather","Open Sans"],"BCP-018":["Lora","Open Sans"],"BCP-019":["Exo 2","Roboto"],"BCP-020":["Rajdhani","Open Sans"],"BCP-021":["Poiret One","Raleway"],"BCP-022":["Nunito","Open Sans"],"BCP-023":["Poppins","Open Sans"],"BCP-024":["Josefin Slab","Open Sans"],"BCP-025":["Libre Baskerville","Open Sans"],"BCP-026":["Chewy","Nunito"],"BCP-027":["Roboto Slab","Open Sans"],"BCP-028":["Montserrat","Open Sans"],"BCP-029":["Arvo","Open Sans"],"BCP-030":["DM Mono","DM Sans"]
+};
+
+// ─── STATE ───
+let selectedPal = null;
+let userType = null;
+let darkMode = false;
+let activeTags = [];
+let qAnswers = {q1:null,q2:null,q3:null};
+let extractedColors = [];
+let selectedExtColors = [];
+let currentCssTab = 'css';
+
+// ─── INIT ───
+window.onload = function(){
+  buildTagFilters();
+  renderPalettes();
+  buildWeekSection();
+  updateMixerPreviews();
+  
+  // Initialize with a beautiful default palette (BCP-007 Midnight Teal)
+  const defaultPal = PALETTES.find(p=>p.code==='BCP-007')||PALETTES[0];
+  if(defaultPal){
+    selectedPal = defaultPal;
+    updateDetailPanel(defaultPal);
+    document.getElementById('detail-panel').classList.add('visible');
+  }
+};
+
+function buildTagFilters(){
+  const row = document.getElementById('tag-filters');
+  ALL_TAGS.forEach(tag=>{
+    const b = document.createElement('button');
+    b.className='filter-chip';b.textContent=tag;
+    b.onclick=()=>{
+      const on=activeTags.includes(tag);
+      activeTags=on?activeTags.filter(t=>t!==tag):[...activeTags,tag];
+      b.classList.toggle('on',!on);renderPalettes();
+    };
+    row.appendChild(b);
+  });
+}
+
+function buildWeekSection(){
+  const wpal = PALETTES.find(p=>p.week)||PALETTES[6];
+  document.getElementById('week-name').textContent=wpal.name;
+  const sw=document.getElementById('week-swatches');
+  sw.innerHTML='';
+  wpal.colors.forEach(c=>{const d=document.createElement('div');d.className='week-sw';d.style.background=c;sw.appendChild(d);});
+}
+
+// ─── RENDER PALETTES ───
+function renderPalettes(){
+  const q=(document.getElementById('pal-search')||{value:''}).value.toLowerCase();
+  const grid=document.getElementById('pal-grid');
+  grid.innerHTML='';
+  let filtered=PALETTES.filter(p=>{
+    const matchTag=activeTags.length===0||activeTags.some(t=>p.tags.includes(t));
+    const matchQ=!q||p.name.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)||p.tags.some(t=>t.includes(q))||p.code.toLowerCase().includes(q);
+    return matchTag&&matchQ;
+  });
+  if(userType==='designer') filtered.sort((a,b)=>a.tags.includes('corporate')||a.tags.includes('tech')?-1:1);
+  if(userType==='reports') filtered.sort((a,b)=>a.tags.includes('reports')||a.tags.includes('corporate')?-1:1);
+  if(filtered.length===0){grid.innerHTML='<div style="padding:32px;color:var(--ink3);font-size:13px">No palettes match — try clearing some filters.</div>';return;}
+  filtered.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='pal-card'+(selectedPal&&selectedPal.code===p.code?' selected':'');
+    const sw=p.colors.map(c=>`<div class="pal-swatch" style="background:${c}"></div>`).join('');
+    const tags=p.tags.map(t=>`<span class="pal-tag">${t}</span>`).join('');
+    const weekBadge=p.week?'<div class="week-badge">⭐ This week</div>':'';
+    card.innerHTML=`${weekBadge}<div class="pal-swatches">${sw}</div><div class="pal-body"><div class="pal-code">${p.code}</div><div class="pal-name">${p.name}</div><div class="pal-desc">${p.desc}</div><div class="pal-tags">${tags}</div><div class="pal-psychology">${p.psychology.slice(0,90)}…</div></div>`;
+    card.onclick=()=>selectPalette(p);
+    grid.appendChild(card);
+  });
+}
+
+// ─── SELECT PALETTE ───
+function selectPalette(p){
+  selectedPal=p;
+  renderPalettes();
+  updateDetailPanel(p);
+  document.getElementById('detail-panel').classList.add('visible');
+  setTimeout(()=>document.getElementById('detail-panel').scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+
+function selectPaletteByCode(code){
+  const p=PALETTES.find(x=>x.code===code);
+  if(p){showTab('browse');setTimeout(()=>selectPalette(p),100);}
+}
+
+function updateDetailPanel(p){
+  const colors=darkMode?makeDarkColors(p.colors):p.colors;
+  // swatches
+  const sw=document.getElementById('dp-swatches');
+  sw.innerHTML='';
+  colors.forEach((c,i)=>{
+    const d=document.createElement('div');d.className='detail-swatch';d.style.background=c;
+    d.innerHTML=`<span class="detail-swatch-hex">${c}</span>`;
+    d.onclick=()=>copyToClipboard(c,'Copied '+c);
+    sw.appendChild(d);
+  });
+  document.getElementById('dp-code').textContent=p.code;
+  document.getElementById('dp-name').textContent=p.name;
+  document.getElementById('dp-desc').textContent=p.desc+' — '+p.psychology.split('.')[0]+'.';
+  // WCAG
+  const wcag=document.getElementById('dp-wcag');
+  wcag.innerHTML='';
+  const ratio1=contrastRatio(colors[0],colors[4]);
+  const ratio2=contrastRatio(colors[1],colors[4]);
+  wcag.innerHTML=`<span class="wcag-pill ${ratio1>=4.5?'wcag-pass':'wcag-fail'}">Primary/Surface: ${ratio1.toFixed(1)}:1 ${ratio1>=4.5?'✓ AA':'✗ Fail'}</span><span class="wcag-pill ${ratio2>=4.5?'wcag-pass':'wcag-fail'}">Accent/Surface: ${ratio2.toFixed(1)}:1 ${ratio2>=4.5?'✓ AA':'✗ Fail'}</span>`;
+  // week pill
+  document.getElementById('dp-week-pill').style.display=p.week?'inline':'none';
+  // color grid
+  const grid=document.getElementById('dp-color-grid');
+  grid.innerHTML='';
+  colors.forEach((c,i)=>{
+    const rgb=hexToRgb(c);
+    const cmyk=rgbToCmyk(rgb[0],rgb[1],rgb[2]);
+    grid.innerHTML+=`<div class="color-detail-row"><div class="cdot" style="background:${c}"></div><div class="cinfo"><div class="crole">${p.roles[i]}</div><div class="chex">${c} · rgb(${rgb.join(',')}) · cmyk(${cmyk})</div></div></div>`;
+  });
+  // mockup
+  renderMockup(colors,p);
+  renderReportMockup(colors);
+  // export panel content
+  updateClientLink(p);
+  updateAIPrompts(p);
+  updateCSSOutput(p);
+  updateEmbedCode(p);
+}
+
+function makeDarkColors(colors){
+  return [lighten(colors[0],0.7),lighten(colors[1],0.4),lighten(colors[2],0.3),'#1a1a1a','#0f0f0f'];
+}
+
+// ─── MOCKUP RENDERING ───
+function renderMockup(colors,p){
+  const [c0,c1,c2,c3,c4]=colors;
+  document.getElementById('mn-nav').style.background=c0;
+  document.getElementById('mn-logo').style.background=c1;
+  document.getElementById('mn-l1').style.background='rgba(255,255,255,0.7)';
+  document.getElementById('mn-l2').style.background='rgba(255,255,255,0.7)';
+  document.getElementById('mn-l3').style.background='rgba(255,255,255,0.7)';
+  document.getElementById('mn-hero').style.background=c4;
+  document.getElementById('mn-h1').style.background=c0;
+  document.getElementById('mn-h2').style.background=c0;
+  document.getElementById('mn-h3').style.background=c0;
+  document.getElementById('mn-btn').style.background=c1;
+  document.getElementById('mn-img').style.background=c2;
+  document.getElementById('mn-cards-row').style.background=c3;
+  document.getElementById('mn-c1').style.background=c4;
+  document.getElementById('mn-c2').style.background=c4;
+  document.getElementById('mn-c3').style.background=c4;
+  document.getElementById('mn-footer').style.background=c0;
+  document.getElementById('mn-ft').style.background='rgba(255,255,255,0.3)';
+}
+
+function renderReportMockup(colors){
+  const [c0,c1,c2,c3,c4]=colors;
+  document.getElementById('rep-mock').style.background=c4;
+  document.getElementById('rep-hdr').style.borderBottomColor=c1;
+  document.getElementById('rep-logo').style.background=c0;
+  document.getElementById('rep-ttl').style.background=c0;
+  document.getElementById('rep-sub').style.background=c2;
+  document.getElementById('rep-bar1').style.background=c1;
+  document.getElementById('rep-bar2').style.background=c0;
+  document.getElementById('rep-r1').style.background=c0;
+  document.getElementById('rep-r2').style.background=c0;
+  document.getElementById('rep-r3').style.background=c0;
+  document.getElementById('rk1').style.background=c3;
+  document.getElementById('rk2').style.background=c3;
+  document.getElementById('rk3').style.background=c3;
+  document.getElementById('rb1').style.background=c1;
+  document.getElementById('rb2').style.background=c0;
+  document.getElementById('rb3').style.background=c2;
+  document.getElementById('rb4').style.background=c1;
+  document.getElementById('rb5').style.background=c2;
+}
+
+function switchPreview(type,btn){
+  document.querySelectorAll('.ptoggle').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('preview-website').classList.toggle('hidden',type==='report');
+  document.getElementById('preview-report').classList.toggle('hidden',type==='website');
+}
+
+function toggleDarkMode(){
+  darkMode=!darkMode;
+  document.getElementById('dark-track').classList.toggle('on',darkMode);
+  if(selectedPal)updateDetailPanel(selectedPal);
+}
+
+// ─── EXPORT PANEL ───
+function openExportPanel(tab){
+  const ep=document.getElementById('export-panel');
+  ep.classList.add('visible');
+  switchEtab(tab,document.getElementById('etab-'+tab));
+  setTimeout(()=>ep.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function switchEtab(tab,btn){
+  document.querySelectorAll('.etab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.epanel').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('epanel-'+tab).classList.add('active');
+}
+
+// ─── CLIENT LINK ───
+function updateClientLink(p){
+  const url=`https://brandcolours.meetingpipeline.com/approve/${p.code}`;
+  const el=document.getElementById('client-link-url');
+  if(el)el.value=url;
+  const preview=document.getElementById('mailto-preview');
+  if(preview)preview.innerHTML=`<strong>Email preview:</strong><br>Subject: Your brand palette for approval — ${p.name}<br>Message: Hi [Client name], I've put together a brand colour palette for you called "${p.name}". Please click the link below to preview it on a website mockup and approve it with one click.<br><br>🎨 View & approve: <a href="${url}" style="color:var(--ink)">${url}</a><br><br>Once approved, I'll use code <strong>${p.code}</strong> to apply these colours across all your deliverables.`;
+}
+
+function copyClientLink(){
+  const v=document.getElementById('client-link-url').value;
+  copyToClipboard(v,'Client approval link copied!');
+}
+
+function openClientMailto(){
+  if(!selectedPal)return;
+  const p=selectedPal;
+  const url=`https://brandcolours.meetingpipeline.com/approve/${p.code}`;
+  const subject=encodeURIComponent(`Your brand palette for approval — ${p.name}`);
+  const body=encodeURIComponent(`Hi,\n\nI've prepared your brand colour palette: ${p.name} (${p.code})\n\nPlease preview and approve it here:\n${url}\n\nOnce approved, I'll apply these exact colours across all your project deliverables.\n\nBest regards`);
+  window.location.href=`mailto:?subject=${subject}&body=${body}`;
+}
+
+// ─── AI PROMPTS ───
+function updateAIPrompts(p){
+  const colors=darkMode?makeDarkColors(p.colors):p.colors;
+  const colStr=colors.map((c,i)=>`${p.roles[i].toLowerCase()}: ${c}`).join(', ');
+  const prompts=[
+    {name:'Claude / Any AI',icon:'🤖',text:`Use brand palette ${p.code} "${p.name}": ${colStr}. Apply consistently: primary for headings and nav, accent for buttons and CTAs, secondary for icons and charts, tint for section backgrounds, surface for page background.`},
+    {name:'ChatGPT',icon:'💚',text:`Design using palette ${p.code}: ${colors.map((c,i)=>`${p.roles[i]}=${c}`).join(', ')}. ${p.psychology.split('.')[0]}.`},
+    {name:'Canva AI (Magic Design)',icon:'🎨',text:`Colour palette: ${colors.slice(0,4).join(', ')}. Style: ${p.desc}. ${p.psychology.split('.')[0]}.`},
+    {name:'Midjourney / DALL-E',icon:'🖼️',text:`Brand identity using hex colors ${colors.slice(0,3).join(', ')}, ${p.desc} aesthetic, professional design, clean layout --style raw`}
+  ];
+  const el=document.getElementById('ai-prompts');
+  el.innerHTML=prompts.map((a,idx)=>`<div class="ai-prompt-option"><div class="ai-logo">${a.icon}</div><div class="grow"><div class="ai-name">${a.name}${idx > 0 ? ' <span class="pro-badge">Pro</span>' : ''}</div><div class="ai-prompt-text">${a.text}</div><button class="ai-copy-btn" onclick="${idx > 0 ? 'openUpgradeModal(\'ai\')' : `copyToClipboard(\`${a.text.replace(/`/g,"'")}\`,'Prompt copied!')`}">${idx > 0 ? '🔒 Copy' : 'Copy'}</button></div></div>`).join('');
+}
+
+// ─── CSS OUTPUT ───
+function updateCSSOutput(p){
+  const colors=darkMode?makeDarkColors(p.colors):p.colors;
+  if(currentCssTab==='css') renderCssOutput(p,colors);
+  else if(currentCssTab==='tailwind') renderTailwindOutput(p,colors);
+  else renderScssOutput(p,colors);
+}
+
+function switchCssTab(tab){
+  if(tab==='tailwind'||tab==='scss'){
+    openUpgradeModal('css-'+tab);
+    return;
+  }
+  currentCssTab=tab;
+  ['css','tailwind','scss'].forEach(t=>document.getElementById('css-tab-'+t).classList.toggle('on',t===tab));
+  if(selectedPal)updateCSSOutput(selectedPal);
+}
+
+function renderCssOutput(p,colors){
+  const code=`:root {\n  /* ${p.code} ${p.name} */\n${colors.map((c,i)=>`  --color-${p.roles[i].replace(/[\s,\/]+/g,'-').toLowerCase()}: ${c};`).join('\n')}\n}`;
+  document.getElementById('css-output').innerHTML=`<div class="code-block"><button class="code-copy-btn" onclick="copyCode('css-output')">Copy</button>${escHtml(code)}</div>`;
+}
+
+function renderTailwindOutput(p,colors){
+  const code=`// tailwind.config.js — ${p.code} ${p.name}\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n        brand: {\n${colors.map((c,i)=>`          '${p.roles[i].replace(/[\s,\/]+/g,'-').toLowerCase()}': '${c}',`).join('\n')}\n        }\n      }\n    }\n  }\n}`;
+  document.getElementById('css-output').innerHTML=`<div class="code-block"><button class="code-copy-btn" onclick="copyCode('css-output')">Copy</button>${escHtml(code)}</div>`;
+}
+
+function renderScssOutput(p,colors){
+  const code=`// ${p.code} ${p.name}\n${colors.map((c,i)=>`$color-${p.roles[i].replace(/[\s,\/]+/g,'-').toLowerCase()}: ${c};`).join('\n')}`;
+  document.getElementById('css-output').innerHTML=`<div class="code-block"><button class="code-copy-btn" onclick="copyCode('css-output')">Copy</button>${escHtml(code)}</div>`;
+}
+
+// ─── EMBED CODE ───
+function updateEmbedCode(p){
+  const code=`<script src="https://brandcolours.meetingpipeline.com/widget/bcs.js"><\/script>\n<div id="bcs-widget" data-palette="${p.code}" data-key="YOUR_AGENCY_KEY"></div>`;
+  document.getElementById('embed-code-text').textContent=code;
+}
+
+// ─── PDF BRAND KIT ───
+function generatePDF(){
+  openUpgradeModal('pdf');
+  return;
+  if(!selectedPal){toast('Please select a palette first.');return;}
+  const p=selectedPal;
+  const colors=darkMode?makeDarkColors(p.colors):p.colors;
+  const fonts=FONT_PAIRS[p.code]||['Georgia','Open Sans'];
+  if(typeof window.jspdf==='undefined'){toast('PDF library loading… please try again in a moment.');return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297;
+  // Background
+  doc.setFillColor(249,248,246);doc.rect(0,0,W,H,'F');
+  // Header bar
+  doc.setFillColor(...hexToRgbArr(colors[0]));doc.rect(0,0,W,28,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+  doc.text('Brand Colour Kit',14,18);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(`${p.code}  ·  ${p.name}`,14,24);
+  doc.text('meetingpipeline.com',W-14,24,'right');
+  // Code + date
+  doc.setTextColor(100,100,100);doc.setFontSize(8);
+  doc.text(`Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,W-14,36,'right');
+  // Palette name
+  doc.setTextColor(...hexToRgbArr(colors[0]));doc.setFontSize(22);doc.setFont('helvetica','bold');
+  doc.text(p.name,14,48);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(90,90,90);
+  doc.text(p.desc,14,55);
+  // Colour swatches row
+  const swW=32,swH=22,swY=62,swGap=3;
+  colors.forEach((c,i)=>{
+    const x=14+(swW+swGap)*i;
+    doc.setFillColor(...hexToRgbArr(c));doc.roundedRect(x,swY,swW,swH,2,2,'F');
+  });
+  // Colour details table
+  let y=92;
+  doc.setFillColor(...hexToRgbArr(colors[0]));doc.rect(14,y,W-28,7,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont('helvetica','bold');
+  doc.text('COLOUR',16,y+5);doc.text('ROLE',56,y+5);doc.text('HEX',96,y+5);doc.text('RGB',126,y+5);doc.text('CMYK',166,y+5);
+  y+=7;
+  colors.forEach((c,i)=>{
+    const isOdd=i%2===0;
+    doc.setFillColor(isOdd?245:255,isOdd?244:255,isOdd?242:255);doc.rect(14,y,W-28,10,'F');
+    doc.setFillColor(...hexToRgbArr(c));doc.roundedRect(16,y+2,10,6,1,1,'F');
+    doc.setTextColor(40,40,40);doc.setFontSize(8);doc.setFont('helvetica','normal');
+    const rgb=hexToRgb(c);
+    const cmyk=rgbToCmyk(rgb[0],rgb[1],rgb[2]);
+    doc.text(p.roles[i],56,y+7);
+    doc.setFont('helvetica','bold');doc.text(c,96,y+7);
+    doc.setFont('helvetica','normal');
+    doc.text(`rgb(${rgb.join(',')})`,126,y+7);
+    doc.text(`cmyk(${cmyk})`,166,y+7);
+    y+=10;
+  });
+  y+=8;
+  // Psychology
+  doc.setFillColor(240,238,232);doc.roundedRect(14,y,W-28,22,2,2,'F');
+  doc.setTextColor(...hexToRgbArr(colors[0]));doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text('COLOUR PSYCHOLOGY',18,y+7);
+  doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
+  const psychLines=doc.splitTextToSize(p.psychology,W-40);
+  doc.text(psychLines,18,y+13);
+  y+=28;
+  // WCAG
+  const r1=contrastRatio(colors[0],colors[4]);
+  const r2=contrastRatio(colors[1],colors[4]);
+  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...hexToRgbArr(colors[0]));
+  doc.text('WCAG ACCESSIBILITY',14,y+6);
+  y+=10;
+  [[`Primary on Surface: ${r1.toFixed(1)}:1`,r1>=4.5],[`Accent on Surface: ${r2.toFixed(1)}:1`,r2>=4.5]].forEach(([txt,pass])=>{
+    doc.setFillColor(...(pass?[232,245,238]:[253,232,232]));doc.roundedRect(14,y,80,8,2,2,'F');
+    doc.setTextColor(...(pass?[26,107,58]:[139,26,26]));doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text(`${pass?'✓ AA PASS':'✗ FAIL'}  ${txt}`,18,y+5.5);
+    y+=12;
+  });
+  // Font pairing
+  y+=2;
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...hexToRgbArr(colors[0]));
+  doc.text('RECOMMENDED FONT PAIRINGS',14,y);
+  y+=8;
+  doc.setFillColor(245,244,242);doc.roundedRect(14,y,W-28,12,2,2,'F');
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(40,40,40);
+  doc.text(`Display / Heading:  ${fonts[0]}`,18,y+5);
+  doc.text(`Body / Content:  ${fonts[1]}`,18,y+10);
+  y+=20;
+  // AI prompt
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...hexToRgbArr(colors[0]));
+  doc.text('AI DESIGN PROMPT',14,y);
+  y+=7;
+  const promptText=`Use palette ${p.code} "${p.name}": ${colors.map((c,i)=>`${p.roles[i].toLowerCase()} ${c}`).join(', ')}.`;
+  doc.setFillColor(...hexToRgbArr(colors[0]));doc.roundedRect(14,y,W-28,16,2,2,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','normal');doc.setFontSize(7.5);
+  const promptLines=doc.splitTextToSize(promptText,W-40);
+  doc.text(promptLines,18,y+6);
+  // Footer
+  doc.setFillColor(...hexToRgbArr(colors[0]));doc.rect(0,H-12,W,12,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(7);
+  doc.text('Generated by Brand Colour Studio  ·  meetingpipeline.com',W/2,H-4,'center');
+  doc.save(`${p.code}-${p.name.replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`);
+  toast('✓ Brand kit PDF downloaded!');
+}
+
+function generateMixerPDF(){
+  openUpgradeModal('pdf');
+  return;
+}
+
+// ─── SOCIAL CARD ───
+function generateSocialCard(){
+  openUpgradeModal('social');
+  return;
+  const p=selectedPal;
+  const colors=darkMode?makeDarkColors(p.colors):p.colors;
+  const wrapper=document.getElementById('share-canvas-wrapper');
+  const canvas=document.getElementById('share-canvas');
+  canvas.width=600;canvas.height=315;
+  const ctx=canvas.getContext('2d');
+  // Background gradient
+  ctx.fillStyle=colors[0];ctx.fillRect(0,0,600,315);
+  // Colour strips at top
+  const sw=600/5;
+  colors.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(i*sw,0,sw,14);});
+  // Title
+  ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 28px Georgia,serif';ctx.fillText(p.name,32,72);
+  ctx.font='14px sans-serif';ctx.fillStyle='rgba(255,255,255,0.6)';ctx.fillText(p.code+'  ·  '+p.desc,32,98);
+  // Large swatches
+  const big=52,gap=10,startX=32,sy=125;
+  colors.forEach((c,i)=>{
+    ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(startX+i*(big+gap),sy,big,big,6);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font='bold 9px monospace';
+    ctx.fillText(c,startX+i*(big+gap)+2,sy+big+12);
+  });
+  // Psychology snippet
+  ctx.font='13px sans-serif';ctx.fillStyle='rgba(255,255,255,0.5)';
+  const psych=p.psychology.slice(0,80)+'…';
+  ctx.fillText(psych,32,230);
+  // Branding bar
+  ctx.fillStyle='rgba(0,0,0,0.35)';ctx.fillRect(0,282,600,33);
+  ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='bold 12px Georgia,serif';ctx.fillText('Brand Colour Studio',32,302);
+  ctx.font='11px sans-serif';ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillText('meetingpipeline.com',600-160,302);
+  wrapper.style.display='inline-block';
+  toast('✓ Social card generated — click Download!');
+}
+
+function downloadSocialCard(){
+  if(!selectedPal)return;
+  const canvas=document.getElementById('share-canvas');
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL('image/png');
+  a.download=`${selectedPal.code}-${selectedPal.name.replace(/\s+/g,'-')}-social-card.png`;
+  a.click();
+  toast('✓ Social card downloaded!');
+}
+
+// ─── QUESTIONNAIRE ───
+function qSelect(el,qkey){
+  el.closest('.q-options').querySelectorAll('.q-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  qAnswers[qkey]=el.dataset.val;
+  const nxt=document.getElementById('qnext'+qkey.replace('q',''));
+  if(nxt)nxt.removeAttribute('disabled');
+}
+
+function qNext(step){
+  document.querySelectorAll('.q-step').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('qs'+step);
+  if(el)el.classList.add('active');
+  ['qd1','qd2','qd3'].forEach((id,i)=>{document.getElementById(id).classList.toggle('done',i<step);});
+}
+
+function resetQuestionnaire(){
+  qAnswers={q1:null,q2:null,q3:null};
+  document.querySelectorAll('.q-option').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.btn-q-next').forEach(b=>b.setAttribute('disabled',''));
+  document.getElementById('q-results').classList.remove('visible');
+  document.querySelectorAll('.q-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('qs1').classList.add('active');
+  document.getElementById('qd1').classList.add('done');
+  document.getElementById('qd2').classList.remove('done');
+  document.getElementById('qd3').classList.remove('done');
+}
+
+function showResults(){
+  document.querySelectorAll('.q-step').forEach(s=>s.classList.remove('active'));
+  const res=document.getElementById('q-results');
+  res.classList.add('visible');
+  const {q1,q2,q3}=qAnswers;
+  // Score each palette
+  const scored=PALETTES.map(p=>{
+    let score=0;
+    if(p.industry.includes(q1))score+=40;
+    if(p.mood.includes(q2))score+=35;
+    if(p.audience.includes(q3))score+=25;
+    // partial matches
+    if(q1==='finance'&&(p.tags.includes('corporate')||p.tags.includes('reports')))score+=10;
+    if(q1==='tech'&&(p.tags.includes('saas')||p.tags.includes('analytics')))score+=10;
+    if(q2==='trust'&&(p.tags.includes('corporate')||p.tags.includes('finance')))score+=10;
+    return{...p,score};
+  }).sort((a,b)=>b.score-a.score).slice(0,4);
+  const cards=document.getElementById('result-cards');
+  cards.innerHTML='';
+  const labels=['🥇 Best match','🥈 Strong match','🥉 Good match','Honourable mention'];
+  scored.forEach((p,i)=>{
+    const sw=p.colors.map(c=>`<div class="result-sw" style="background:${c}"></div>`).join('');
+    const card=document.createElement('div');
+    card.className='result-card'+(i===0?' rank1':'');
+    card.innerHTML=`<div class="result-top"><div class="result-swatches">${sw}</div><div class="result-info"><div class="result-rank">${labels[i]}</div><div class="result-name">${p.name}</div><div class="result-match">${p.code} · ${p.desc}</div></div><div class="result-score">${p.score}%</div></div>`;
+    card.onclick=()=>{showTab('browse');setTimeout(()=>selectPalette(p),100);};
+    cards.appendChild(card);
+  });
+  document.getElementById('q-results-desc').textContent=`Based on: ${q1} industry, ${q2} mood, ${q3} audience. Click any result to preview and generate your brand kit.`;
+}
+
+// ─── CUSTOM MIXER ───
+const MIX_KEYS=['primary','accent','secondary','tint'];
+function syncMix(k,v){document.getElementById('mxt-'+k).value=v;updateMixerPreviews();}
+function syncMixText(k,v){if(/^#[0-9A-Fa-f]{6}$/.test(v)){document.getElementById('mxc-'+k).value=v;updateMixerPreviews();}}
+function updateMixerPreviews(){
+  MIX_KEYS.forEach(k=>{const v=document.getElementById('mxc-'+k).value;if(document.getElementById('mxp-'+k))document.getElementById('mxp-'+k).style.background=v;});
+  const colors=MIX_KEYS.map(k=>document.getElementById('mxc-'+k).value);
+  colors.push('#ffffff');
+  const liveEl=document.getElementById('mix-live-preview');
+  if(liveEl){
+    liveEl.innerHTML=`<div class="mock-container" style="max-width:440px"><div class="mock-nav" style="background:${colors[0]}"><div class="mock-logo-block" style="background:${colors[1]}"></div><div class="mock-nav-links"><div class="mock-nav-link" style="background:rgba(255,255,255,0.7)"></div><div class="mock-nav-link" style="background:rgba(255,255,255,0.7)"></div></div></div><div class="mock-hero-area" style="background:${colors[4]}"><div class="mock-text-col"><div class="mock-h1" style="background:${colors[0]}"></div><div class="mock-h2" style="background:${colors[0]};opacity:.5"></div><div class="mock-btn-block" style="background:${colors[1]};width:80px;height:24px;border-radius:5px;margin-top:10px"></div></div><div class="mock-hero-img" style="background:${colors[2]}"></div></div><div class="mock-cards-row" style="background:${colors[3]}"><div class="mock-mini-card" style="background:${colors[4]}"></div><div class="mock-mini-card" style="background:${colors[4]}"></div><div class="mock-mini-card" style="background:${colors[4]}"></div></div></div>`;
+  }
+}
+function useMixerPalette(){
+  const name=document.getElementById('mx-name').value||'Custom Palette';
+  const code=document.getElementById('mx-code').value||'BCP-CUSTOM';
+  const colors=MIX_KEYS.map(k=>document.getElementById('mxc-'+k).value);
+  const roles=MIX_KEYS.map(k=>document.getElementById('mxr-'+k).value);
+  const custom={code,name,desc:'Custom palette',tags:['custom'],colors:[...colors,'#ffffff'],roles:[...roles,'Surface'],psychology:'Your custom brand palette.',mood:[],industry:[],audience:[],week:false};
+  showTab('browse');
+  selectedPal=custom;
+  updateDetailPanel(custom);
+  document.getElementById('detail-panel').classList.add('visible');
+  setTimeout(()=>document.getElementById('detail-panel').scrollIntoView({behavior:'smooth'}),100);
+  toast('✓ Custom palette applied — preview and download your brand kit below.');
+}
+
+// ─── LOGO EXTRACTOR ───
+function handleLogoDrop(e){
+  e.preventDefault();document.getElementById('logo-upload-area').classList.remove('drag');
+  const file=e.dataTransfer.files[0];if(file)extractLogoColors(file);
+}
+
+function extractLogoColors(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      document.getElementById('logo-preview-img').src=ev.target.result;
+      const canvas=document.createElement('canvas');
+      const MAX=80;
+      const scale=Math.min(MAX/img.width,MAX/img.height,1);
+      canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+      const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      // k-means-lite: sample then cluster
+      const samples=[];
+      for(let i=0;i<data.length;i+=16){
+        if(data[i+3]<128)continue;// skip transparent
+        samples.push([data[i],data[i+1],data[i+2]]);
+      }
+      const clusters=simpleKMeans(samples,6);
+      extractedColors=clusters.map(c=>`#${c.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('')}`);
+      selectedExtColors=[...extractedColors];
+      renderExtractedSwatches();
+      document.getElementById('logo-extracted').classList.add('visible');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function simpleKMeans(points,k){
+  if(points.length===0)return[];
+  // init centroids
+  let centroids=[];
+  const step=Math.floor(points.length/k);
+  for(let i=0;i<k;i++)centroids.push([...points[Math.min(i*step,points.length-1)]]);
+  for(let iter=0;iter<12;iter++){
+    const clusters=Array.from({length:k},()=>[]);
+    points.forEach(p=>{
+      let best=0,bestD=Infinity;
+      centroids.forEach((c,i)=>{const d=(p[0]-c[0])**2+(p[1]-c[1])**2+(p[2]-c[2])**2;if(d<bestD){bestD=d;best=i;}});
+      clusters[best].push(p);
+    });
+    centroids=clusters.map(cl=>{
+      if(!cl.length)return[128,128,128];
+      return[cl.reduce((s,p)=>s+p[0],0)/cl.length,cl.reduce((s,p)=>s+p[1],0)/cl.length,cl.reduce((s,p)=>s+p[2],0)/cl.length];
+    });
+  }
+  return centroids;
+}
+
+function renderExtractedSwatches(){
+  const el=document.getElementById('ext-swatches');
+  el.innerHTML='';
+  extractedColors.forEach(c=>{
+    const d=document.createElement('div');d.className='ext-swatch sel';d.style.background=c;
+    d.innerHTML=`<span class="ext-hex-label">${c}</span>`;
+    d.onclick=()=>{d.classList.toggle('sel');selectedExtColors=d.classList.contains('sel')?[...selectedExtColors,c]:selectedExtColors.filter(x=>x!==c);};
+    el.appendChild(d);
+  });
+}
+
+function buildLogopalette(){
+  const colors=[...selectedExtColors].slice(0,4);
+  while(colors.length<4)colors.push('#f0f0f0');
+  colors.push('#ffffff');
+  const custom={code:'BCP-LOGO',name:'From My Logo',desc:'Extracted from uploaded logo',tags:['custom'],colors,roles:['Primary','Accent','Secondary','Tint','Surface'],psychology:'Palette automatically extracted from your brand logo using browser-based colour analysis.',mood:[],industry:[],audience:[],week:false};
+  showTab('browse');
+  selectedPal=custom;
+  updateDetailPanel(custom);
+  document.getElementById('detail-panel').classList.add('visible');
+  setTimeout(()=>document.getElementById('detail-panel').scrollIntoView({behavior:'smooth'}),100);
+  toast('✓ Logo palette built! Preview and download your brand kit below.');
+}
+
+// ─── USER TYPE ───
+function selectUType(el){
+  document.querySelectorAll('.utype-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  userType=el.dataset.type;
+}
+function startApp(){
+  if(userType){
+    document.getElementById('user-type-overlay').style.display='none';
+    document.getElementById('user-type-label').textContent=({designer:'Web Designer',reports:'Report Writer',business:'Business Owner',agency:'Agency',developer:'Developer',creator:'Creator'})[userType]||'User';
+    renderPalettes();
+    // guide user
+    if(userType==='business'||userType==='creator'){showTab('start');toggleWizardPath('quiz');toast('👋 Answer 3 quick questions to find your perfect palette!');}
+    else if(userType==='developer'){toast('👋 Use the CSS/Tailwind export tab in any palette for ready-to-paste code.');}
+    else{toast('👋 Welcome! Browse palettes or use the wizard to find your match.');}
+  } else {
+    toast('Please select your user type to continue.');
+  }
+}
+function skipUType(){
+  document.getElementById('user-type-overlay').style.display='none';
+}
+function showUserTypeOverlay(){
+  document.getElementById('user-type-overlay').style.display='flex';
+}
+
+// ─── TAB SWITCHING ───
+function showTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('tab-'+tab);
+  const tabs={start:0,browse:1,custom:2,pricing:3};
+  if(panel)panel.classList.add('active');
+  const idx=tabs[tab];
+  const tabBtns=document.querySelectorAll('.main-tab');
+  if(tabBtns[idx])tabBtns[idx].classList.add('active');
+  if(tab==='custom')updateMixerPreviews();
+}
+
+function toggleWizardPath(path){
+  document.querySelectorAll('.wizard-card').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.wizard-path-content').forEach(p=>p.classList.add('hidden'));
+  
+  if(path === 'logo'){
+    document.getElementById('wizard-card-logo').classList.add('active');
+    document.getElementById('wizard-path-logo').classList.remove('hidden');
+  } else {
+    document.getElementById('wizard-card-quiz').classList.add('active');
+    document.getElementById('wizard-path-quiz').classList.remove('hidden');
+  }
+}
+
+// ─── COLOUR UTILS ───
+function hexToRgb(hex){
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex.split('').map(c=>c+c).join('');
+  return[parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16)];
+}
+function hexToRgbArr(hex){return hexToRgb(hex);}
+function rgbToCmyk(r,g,b){
+  r/=255;g/=255;b/=255;
+  const k=1-Math.max(r,g,b);
+  if(k===1)return'0,0,0,100';
+  const c=((1-r-k)/(1-k)*100).toFixed(0);
+  const m=((1-g-k)/(1-k)*100).toFixed(0);
+  const y2=((1-b-k)/(1-k)*100).toFixed(0);
+  return`${c},${m},${y2},${(k*100).toFixed(0)}`;
+}
+function relativeLuminance(hex){
+  const [r,g,b]=hexToRgb(hex).map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+  return 0.2126*r+0.7152*g+0.0722*b;
+}
+function contrastRatio(hex1,hex2){
+  const L1=relativeLuminance(hex1),L2=relativeLuminance(hex2);
+  return(Math.max(L1,L2)+0.05)/(Math.min(L1,L2)+0.05);
+}
+function lighten(hex,amount){
+  const[r,g,b]=hexToRgb(hex);
+  const rl=Math.min(255,Math.round(r+(255-r)*amount));
+  const gl=Math.min(255,Math.round(g+(255-g)*amount));
+  const bl=Math.min(255,Math.round(b+(255-b)*amount));
+  return`#${[rl,gl,bl].map(v=>v.toString(16).padStart(2,'0')).join('')}`;
+}
+
+// ─── CLIPBOARD / COPY ───
+function copyToClipboard(text,msg){
+  navigator.clipboard.writeText(text).then(()=>toast(msg||'Copied!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast(msg||'Copied!');
+  });
+}
+function copyCode(containerId){
+  const el=document.getElementById(containerId);
+  const code=el.querySelector('.code-block')?el.querySelector('.code-block').innerText.replace(/^Copy\s*/,''):el.innerText.replace(/^Copy\s*/,'');
+  copyToClipboard(code,'Code copied!');
+}
+function copyClientLink(){
+  openUpgradeModal('client');
+}
+function openClientMailto(){
+  openUpgradeModal('client');
+}
+
+// ─── TOAST ───
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ─── HTML ESCAPE ───
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ─── UPGRADE MODAL TRIGGERS ───
+const CHECKOUT_URLS = {
+  monthly: '',
+  lifetime: ''
+};
+
+function openUpgradeModal(feature){
+  const overlay = document.getElementById('upgrade-modal-overlay');
+  overlay.classList.add('visible');
+}
+function closeUpgradeModal(){
+  const overlay = document.getElementById('upgrade-modal-overlay');
+  overlay.classList.remove('visible');
+}
+function triggerCheckout(plan){
+  const planLabel = plan === 'monthly' ? 'Pro Monthly (£9/mo)' : 'Lifetime Access (£49)';
+  const checkoutUrl = CHECKOUT_URLS[plan];
+  if(checkoutUrl){
+    toast(`Redirecting to secure checkout for ${planLabel}...`);
+    setTimeout(() => { window.location.href = checkoutUrl; }, 800);
+    return;
+  }
+  const subject = encodeURIComponent(`Brand Colour Studio ${planLabel}`);
+  const body = encodeURIComponent(`Hi,\n\nI would like to buy ${planLabel} for Brand Colour Studio.\n\nPlease send me the secure payment link.\n\nThanks`);
+  toast('Opening an email request because the live payment link has not been connected yet.');
+  setTimeout(() => {
+    window.location.href = `mailto:hello@meetingpipeline.com?subject=${subject}&body=${body}`;
+  }, 800);
+}
+
+function sharePalette(){
+  if(!selectedPal) { toast('Please select a palette first.'); return; }
+  const p = selectedPal;
+  const hexes = p.colors.slice(0, 4).join(', ');
+  const shareText = `Look at this beautiful brand colour palette generated by Brand Colour Studio!\n\n🎨 Palette: "${p.name}" (${p.code})\n✨ Hexes: ${hexes}\n\nBuild your own brand system in 5 minutes at: https://brandcolours.meetingpipeline.com`;
+  copyToClipboard(shareText, 'Share text copied to clipboard!');
+}
+
+</script>
+</body>
+</html>
