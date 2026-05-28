@@ -27,7 +27,8 @@ Before launch, replace the empty URLs in `CHECKOUT_URLS` inside `index.html` wit
 ```js
 const CHECKOUT_URLS = {
   monthly: 'https://buy.stripe.com/...',
-  lifetime: 'https://buy.stripe.com/...'
+  lifetime: 'https://buy.stripe.com/...',
+  service: 'https://buy.stripe.com/...'
 };
 ```
 
