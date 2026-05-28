@@ -799,6 +799,124 @@ button{font-family:var(--font-body);cursor:pointer;border:none;background:none;c
   color: var(--ink3);
   line-height: 1.55;
 }
+.money-section{
+  max-width:1160px;
+  margin:0 auto;
+  padding:34px 16px 14px;
+}
+.money-band{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:22px;
+  box-shadow:var(--shadow);
+}
+.money-grid{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:22px;
+  align-items:start;
+}
+.money-eyebrow{
+  font-size:10px;
+  font-weight:800;
+  color:var(--accent2);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  margin-bottom:8px;
+}
+.money-title{
+  font-family:var(--font-display);
+  font-size:24px;
+  line-height:1.2;
+  font-weight:900;
+  color:var(--ink);
+  margin-bottom:8px;
+}
+.money-copy{
+  font-size:13px;
+  color:var(--ink3);
+  line-height:1.65;
+}
+.money-proof{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:16px;
+}
+.proof-box{
+  background:var(--paper2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px;
+}
+.proof-num{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:900;
+  color:var(--ink);
+  line-height:1;
+}
+.proof-label{
+  font-size:11px;
+  color:var(--ink3);
+  margin-top:5px;
+  line-height:1.35;
+}
+.offer-card{
+  border:2px solid var(--ink);
+  border-radius:10px;
+  padding:18px;
+  background:linear-gradient(135deg,var(--paper),var(--paper2));
+}
+.offer-price{
+  font-family:var(--font-display);
+  font-size:34px;
+  font-weight:900;
+  color:var(--ink);
+  line-height:1;
+  margin:8px 0 4px;
+}
+.offer-list{
+  list-style:none;
+  margin:14px 0;
+  padding:0;
+}
+.offer-list li{
+  font-size:12px;
+  color:var(--ink3);
+  padding:5px 0;
+  border-top:1px solid var(--border);
+}
+.offer-list li::before{
+  content:'✓';
+  color:var(--success);
+  font-weight:900;
+  margin-right:7px;
+}
+.offer-btn{
+  width:100%;
+  padding:12px 16px;
+  border-radius:8px;
+  background:var(--accent);
+  color:var(--ink);
+  font-weight:800;
+  font-size:13px;
+}
+.offer-btn:hover{background:#d4b030}
+.market-gap{
+  margin-top:14px;
+  font-size:12px;
+  color:var(--ink3);
+  line-height:1.55;
+  background:var(--paper2);
+  border-left:3px solid var(--accent);
+  padding:10px 12px;
+}
+@media(max-width:760px){
+  .money-grid{grid-template-columns:1fr}
+  .money-proof{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -865,7 +983,7 @@ button{font-family:var(--font-body);cursor:pointer;border:none;background:none;c
   <p class="hero-sub">Upload a logo or answer 3 quick questions. Brand Colour Studio builds your entire colour system – palette, roles, accessibility checks, and a client-ready PDF kit – with export-ready CSS and AI prompts.</p>
   <div class="hero-actions">
     <button class="btn-hero-primary" onclick="showTab('start');document.getElementById('app').scrollIntoView({behavior:'smooth'})">Start free – build my palette</button>
-    <button class="btn-hero-secondary" onclick="document.getElementById('example-outputs').scrollIntoView({behavior:'smooth'})">See examples</button>
+    <button class="btn-hero-secondary" onclick="document.getElementById('service-offer').scrollIntoView({behavior:'smooth'})">Get a 48-hour brand kit</button>
   </div>
   <div class="hero-pills">
     <span class="hero-pill">✓ 30+ curated palettes</span>
@@ -884,6 +1002,49 @@ button{font-family:var(--font-body);cursor:pointer;border:none;background:none;c
     <span class="trust-item">Export-ready CSS, PDF and client approval workflows</span>
   </div>
   <div class="revenue-note">Early-access lifetime deal: get Pro exports, approval flows and future updates for a one-time launch price.</div>
+</section>
+
+<!-- PRODUCTIZED SERVICE OFFER -->
+<section id="service-offer" class="money-section">
+  <div class="money-band">
+    <div class="money-grid">
+      <div>
+        <div class="money-eyebrow">Fastest path to revenue</div>
+        <h2 class="money-title">A productized service, not just another free colour tool.</h2>
+        <p class="money-copy">The market already has strong free palette generators. Brand Colour Studio becomes easier to sell when it promises the outcome clients actually pay for: a finished, approved colour system that a designer or founder can use immediately across a website, report, pitch deck and AI design prompts.</p>
+        <div class="money-proof">
+          <div class="proof-box">
+            <div class="proof-num">48h</div>
+            <div class="proof-label">client-ready brand colour kit turnaround</div>
+          </div>
+          <div class="proof-box">
+            <div class="proof-num">3</div>
+            <div class="proof-label">palette routes with website and report previews</div>
+          </div>
+          <div class="proof-box">
+            <div class="proof-num">1</div>
+            <div class="proof-label">approval link to stop revision drift</div>
+          </div>
+        </div>
+        <div class="market-gap">Positioning: free generators help users pick colours. This service helps them get client approval and implementation assets without a design meeting.</div>
+      </div>
+      <div class="offer-card">
+        <div class="price-badge" style="position:static;display:inline-block;transform:none;margin-bottom:6px">DONE-FOR-YOU</div>
+        <div class="price-name">48-Hour Brand Colour Kit</div>
+        <div class="offer-price">£149</div>
+        <span class="price-freq">fixed-price launch offer</span>
+        <ul class="offer-list">
+          <li>Logo or existing website colour extraction</li>
+          <li>Three recommended palette routes with rationale</li>
+          <li>Website/report preview screenshots</li>
+          <li>PDF brand colour guide and CSS variables</li>
+          <li>Client approval email copy</li>
+        </ul>
+        <button class="offer-btn" onclick="openServiceEnquiry('48-hour-kit')">Request the 48-hour kit</button>
+        <div class="text-xs muted mt12">Best sold directly to freelancers, agencies, consultants and founders who need a finished answer this week.</div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- EXAMPLE OUTPUTS SECTION -->
@@ -1171,17 +1332,17 @@ button{font-family:var(--font-body);cursor:pointer;border:none;background:none;c
       </div>
       
       <!-- Agency Card (Muted) -->
-      <div class="price-card" style="opacity: 0.55;">
-        <div class="price-name" style="color: var(--accent2);">Agency (Future)</div>
-        <div class="price-amount">£49</div>
-        <span class="price-freq">per month — launching soon</span>
+      <div class="price-card">
+        <div class="price-name" style="color: var(--accent2);">Done-for-you service</div>
+        <div class="price-amount">£149</div>
+        <span class="price-freq">48-hour fixed-price launch offer</span>
         <div class="price-feat"><span class="pf-icon">✓</span>Everything in Professional</div>
-        <div class="price-feat"><span class="pf-icon">✓</span>White-label — your logo, your brand</div>
-        <div class="price-feat"><span class="pf-icon">✓</span>Embeddable widget for your site</div>
-        <div class="price-feat"><span class="pf-icon">✓</span>Typography pairings guides</div>
-        <div class="price-feat"><span class="pf-icon">✓</span>Custom palette uploading</div>
-        <div class="price-feat"><span class="pf-icon">✓</span>Priority support</div>
-        <button class="price-btn" style="background: var(--border); color: var(--ink3); cursor: not-allowed;" disabled>Launching soon</button>
+        <div class="price-feat"><span class="pf-icon">✓</span>Three recommended palette routes</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>Website/report preview screenshots</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>PDF brand colour guide</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>CSS variables and client approval email</div>
+        <div class="price-feat"><span class="pf-icon">✓</span>One revision after feedback</div>
+        <button class="price-btn" onclick="openServiceEnquiry('pricing-service')">Request service →</button>
       </div>
     </div>
     <div style="text-align:center;margin-top:24px;font-size:12px;color:var(--ink3)">💳 Payments powered by Stripe &nbsp;·&nbsp; Cancel any time &nbsp;·&nbsp; No hidden fees &nbsp;·&nbsp; <a href="mailto:hello@meetingpipeline.com" style="color:var(--ink3)">hello@meetingpipeline.com</a></div>
@@ -2149,7 +2310,8 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 // ─── UPGRADE MODAL TRIGGERS ───
 const CHECKOUT_URLS = {
   monthly: '',
-  lifetime: ''
+  lifetime: '',
+  service: ''
 };
 
 function openUpgradeModal(feature){
@@ -2161,7 +2323,7 @@ function closeUpgradeModal(){
   overlay.classList.remove('visible');
 }
 function triggerCheckout(plan){
-  const planLabel = plan === 'monthly' ? 'Pro Monthly (£9/mo)' : 'Lifetime Access (£49)';
+  const planLabel = plan === 'monthly' ? 'Pro Monthly (£9/mo)' : plan === 'service' ? '48-Hour Brand Colour Kit (£149)' : 'Lifetime Access (£49)';
   const checkoutUrl = CHECKOUT_URLS[plan];
   if(checkoutUrl){
     toast(`Redirecting to secure checkout for ${planLabel}...`);
@@ -2174,6 +2336,18 @@ function triggerCheckout(plan){
   setTimeout(() => {
     window.location.href = `mailto:hello@meetingpipeline.com?subject=${subject}&body=${body}`;
   }, 800);
+}
+
+function openServiceEnquiry(source){
+  const palLine = selectedPal ? `\nCurrent palette interest: ${selectedPal.name} (${selectedPal.code})` : '';
+  const subject = encodeURIComponent('48-hour Brand Colour Kit request');
+  const body = encodeURIComponent(`Hi,\n\nI would like the 48-hour Brand Colour Kit service (£149 launch offer).\n\nMy website or logo link:\nMy business/client type:\nDeadline:\n${palLine}\n\nPlease send the next step and payment link.\n\nSource: ${source}`);
+  const checkoutUrl = CHECKOUT_URLS.service;
+  if(checkoutUrl){
+    window.location.href = checkoutUrl;
+    return;
+  }
+  window.location.href = `mailto:hello@meetingpipeline.com?subject=${subject}&body=${body}`;
 }
 
 function sharePalette(){
